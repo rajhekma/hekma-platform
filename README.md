@@ -36,7 +36,8 @@ hekma-platform/
 
 ## Docs
 
-- [Microservice architecture](docs/MICROSERVICE_ARCHITECTURE.md)
+- **[Architecture v2.0](docs/ARCHITECTURE.md)** — current design: 6 products, 5 deployables
+- [Microservice architecture v1.0](docs/MICROSERVICE_ARCHITECTURE.md) — superseded, kept for reference
 - [GitHub / GitLab setup](docs/GITHUB_SETUP.md)
 
 ## Related repos (same workspace)
