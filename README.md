@@ -36,9 +36,11 @@ hekma-platform/
 
 ## Docs
 
-- **[Architecture v2.0](docs/ARCHITECTURE.md)** — current design: 6 products, 5 deployables
-- [Microservice architecture v1.0](docs/MICROSERVICE_ARCHITECTURE.md) — superseded, kept for reference
-- [GitHub / GitLab setup](docs/GITHUB_SETUP.md)
+**[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) is the only design doc to follow.**
+6 sellable products, 5 deployables. Do not build 16 microservices.
+
+- [GitHub setup](docs/GITHUB_SETUP.md)
+- `docs/archive/` — rejected plans, reference only
 
 ## Related repos (same workspace)
 

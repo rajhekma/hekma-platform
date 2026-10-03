@@ -1,14 +1,16 @@
-# Microservice Architecture Design — v1.0 (SUPERSEDED)
+# ⛔ REJECTED PLAN — DO NOT IMPLEMENT
 
-> ⚠️ **Superseded by [ARCHITECTURE.md](./ARCHITECTURE.md) (v2.0).**
+> **This document describes a plan we decided NOT to build.**
 >
-> This plan proposed 16 microservices. It was rejected for a 2–3 engineer team:
-> maintenance overhead alone would consume 30–45% of total capacity, and it
-> contained no tenancy, entitlement, or metering layer — the things actually
-> required to sell features as services.
+> Follow **[../ARCHITECTURE.md](../ARCHITECTURE.md)** instead.
 >
-> Retained for reference. The coupling analysis in §1 and §5 remains accurate and
-> carries forward into v2.0.
+> **Why it was rejected:** 16 independently deployed services would cost roughly
+> 48 engineer-weeks a year in maintenance — 30–45% of a 2–3 person team's total
+> capacity. It also had no tenancy, entitlement, or metering layer, which is what
+> selling features as services actually requires.
+>
+> **What was worth keeping:** the shared-MySQL coupling analysis in §1 and §5, and
+> the four communication rules in §5. Both carry forward into v2.0.
 
 ---
 
