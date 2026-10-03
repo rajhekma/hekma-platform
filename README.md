@@ -40,6 +40,7 @@ hekma-platform/
 6 sellable products, 5 deployables. Do not build 16 microservices.
 
 - **[docs/SERVICE_DECOMPOSITION.md](docs/SERVICE_DECOMPOSITION.md)** — how many services and why: 6 + gateway
+- **[docs/SELLABLE_API_DESIGN.md](docs/SELLABLE_API_DESIGN.md)** — turning Scan AI into a product customers can buy
 - **[docs/TENANCY_DESIGN.md](docs/TENANCY_DESIGN.md)** — multi-org work, when you need it
 - [docs/TENANCY_LEADERSHIP_OVERVIEW.md](docs/TENANCY_LEADERSHIP_OVERVIEW.md) — business-level, for leadership
 - [GitHub setup](docs/GITHUB_SETUP.md)
