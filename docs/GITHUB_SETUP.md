@@ -4,10 +4,9 @@
 
 ### GitHub
 
-1. Go to [https://github.com/organizations/plan](https://github.com/organizations/plan)
-2. Choose **Free** plan (fine for private repos)
-3. Suggested org name: `hekma-health` or `hekma-ai`
-4. Add your team as **Owners** or **Members**
+The organization already exists: **[HekmaAI](https://github.com/HekmaAI/)**.
+
+All microservice repos go under this org. Make sure your GitHub user has **Write** access to it.
 
 ### GitLab
 
@@ -21,29 +20,27 @@ This folder is already initialized as a git repo locally. Push it after creating
 
 ### GitHub (web)
 
-1. Org → **New repository**
-2. Name: `hekma-platform`
-3. Private, **no** README (we already have one)
-4. Create the repo on GitHub **before** pushing (empty repo, no README).
-
-5. Set remote (use your GitHub username or org — **not** the literal text `YOUR_ORG`):
+1. Go to [https://github.com/organizations/HekmaAI/repositories/new](https://github.com/organizations/HekmaAI/repositories/new)
+2. **Owner:** `HekmaAI`
+3. **Name:** `hekma-platform`
+4. **Private**
+5. Leave README / `.gitignore` / license **unchecked** — the local repo already has them
+6. **Create repository**, then push:
 
 ```bash
 cd "/Users/pts_mac_air_m4/Documents/Hekma Projects/hekma-platform"
-git remote remove origin 2>/dev/null || true
-git remote add origin git@github.com:rajhekma/hekma-platform.git
 git push -u origin main
 ```
 
-If you use an organization, replace `rajhekma` with your org name (e.g. `hekma-health`).
+The remote is already set to `git@github.com:HekmaAI/hekma-platform.git`.
 
 ### Troubleshooting: `ERROR: Repository not found`
 
 | Cause | Fix |
 |-------|-----|
-| Remote still says `YOUR_ORG` | `git remote set-url origin git@github.com:rajhekma/hekma-platform.git` |
-| Repo not created on GitHub yet | GitHub → **New repository** → name `hekma-platform` → Create (no README) |
-| Repo under an org you cannot push to | Create under your user account first, or get org access |
+| Repo not created on GitHub yet | Create it in the [HekmaAI org](https://github.com/organizations/HekmaAI/repositories/new) first — git never creates remote repos |
+| No write access to `HekmaAI` | Ask an org owner to add you as a **Member** with write permission |
+| Wrong remote | `git remote set-url origin git@github.com:HekmaAI/hekma-platform.git` |
 | HTTPS vs SSH mismatch | Prefer SSH if `ssh -T git@github.com` works |
 
 ### GitHub CLI (optional)
@@ -51,8 +48,7 @@ If you use an organization, replace `rajhekma` with your org name (e.g. `hekma-h
 ```bash
 brew install gh
 gh auth login
-gh org create hekma-health --description "Hekma microservices"
-gh repo create hekma-health/hekma-platform --private --source=. --remote=origin --push
+gh repo create HekmaAI/hekma-platform --private --source=. --remote=origin --push
 ```
 
 ### Cursor-hosted (alternative)
