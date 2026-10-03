@@ -24,13 +24,27 @@ This folder is already initialized as a git repo locally. Push it after creating
 1. Org → **New repository**
 2. Name: `hekma-platform`
 3. Private, **no** README (we already have one)
-4. Then:
+4. Create the repo on GitHub **before** pushing (empty repo, no README).
+
+5. Set remote (use your GitHub username or org — **not** the literal text `YOUR_ORG`):
 
 ```bash
 cd "/Users/pts_mac_air_m4/Documents/Hekma Projects/hekma-platform"
-git remote add origin git@github.com:YOUR_ORG/hekma-platform.git
+git remote remove origin 2>/dev/null || true
+git remote add origin git@github.com:rajhekma/hekma-platform.git
 git push -u origin main
 ```
+
+If you use an organization, replace `rajhekma` with your org name (e.g. `hekma-health`).
+
+### Troubleshooting: `ERROR: Repository not found`
+
+| Cause | Fix |
+|-------|-----|
+| Remote still says `YOUR_ORG` | `git remote set-url origin git@github.com:rajhekma/hekma-platform.git` |
+| Repo not created on GitHub yet | GitHub → **New repository** → name `hekma-platform` → Create (no README) |
+| Repo under an org you cannot push to | Create under your user account first, or get org access |
+| HTTPS vs SSH mismatch | Prefer SSH if `ssh -T git@github.com` works |
 
 ### GitHub CLI (optional)
 
