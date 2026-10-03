@@ -1,0 +1,85 @@
+# Local platform stack for Hekma microservice development.
+# Start: ./scripts/local-dev.sh up
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: hekma-platform-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-hekma}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hekma_local_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-hekma_platform}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - hekma_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hekma} -d ${POSTGRES_DB:-hekma_platform}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mysql:
+    image: mysql:8.0
+    container_name: hekma-platform-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-hekma_root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-operations_hekma}
+      MYSQL_USER: ${MYSQL_USER:-hekma}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-hekma_local_dev}
+    ports:
+      - "${MYSQL_PORT:-3307}:3306"
+    volumes:
+      - hekma_mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u${MYSQL_USER:-hekma}", "-p${MYSQL_PASSWORD:-hekma_local_dev}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: hekma-platform-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - hekma_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  localstack:
+    image: localstack/localstack:3
+    container_name: hekma-platform-localstack
+    environment:
+      SERVICES: sqs
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-us-east-1}
+      DEBUG: "0"
+    ports:
+      - "${LOCALSTACK_PORT:-4566}:4566"
+    volumes:
+      - hekma_localstack_data:/var/lib/localstack
+
+  api-gateway:
+    image: nginx:1.27-alpine
+    container_name: hekma-platform-gateway
+    ports:
+      - "${GATEWAY_PORT:-9080}:80"
+    volumes:
+      - ./api-gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  hekma_pg_data:
+  hekma_mysql_data:
+  hekma_redis_data:
+  hekma_localstack_data:
