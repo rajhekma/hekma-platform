@@ -36,9 +36,10 @@ hekma-platform/
 
 ## Docs
 
-**[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) is the only design doc to follow.**
+**[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) is the design to follow.**
 6 sellable products, 5 deployables. Do not build 16 microservices.
 
+- **[docs/TENANCY_DESIGN.md](docs/TENANCY_DESIGN.md)** — the work that starts now
 - [GitHub setup](docs/GITHUB_SETUP.md)
 - `docs/archive/` — rejected plans, reference only
 
