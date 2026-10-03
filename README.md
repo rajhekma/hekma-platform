@@ -40,6 +40,7 @@ hekma-platform/
 6 sellable products, 5 deployables. Do not build 16 microservices.
 
 - **[docs/TENANCY_DESIGN.md](docs/TENANCY_DESIGN.md)** — the work that starts now
+- [docs/TENANCY_LEADERSHIP_OVERVIEW.md](docs/TENANCY_LEADERSHIP_OVERVIEW.md) — business-level, for leadership
 - [GitHub setup](docs/GITHUB_SETUP.md)
 - `docs/archive/` — rejected plans, reference only
 
