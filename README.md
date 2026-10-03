@@ -39,7 +39,8 @@ hekma-platform/
 **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) is the design to follow.**
 6 sellable products, 5 deployables. Do not build 16 microservices.
 
-- **[docs/TENANCY_DESIGN.md](docs/TENANCY_DESIGN.md)** — the work that starts now
+- **[docs/SERVICE_DECOMPOSITION.md](docs/SERVICE_DECOMPOSITION.md)** — how many services and why: 6 + gateway
+- **[docs/TENANCY_DESIGN.md](docs/TENANCY_DESIGN.md)** — multi-org work, when you need it
 - [docs/TENANCY_LEADERSHIP_OVERVIEW.md](docs/TENANCY_LEADERSHIP_OVERVIEW.md) — business-level, for leadership
 - [GitHub setup](docs/GITHUB_SETUP.md)
 - `docs/archive/` — rejected plans, reference only
