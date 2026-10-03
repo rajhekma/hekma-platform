@@ -39,8 +39,8 @@ hekma-platform/
 **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) is the design to follow.**
 6 sellable products, 5 deployables. Do not build 16 microservices.
 
-- **[docs/SERVICE_DECOMPOSITION.md](docs/SERVICE_DECOMPOSITION.md)** — how many services and why: 7 + gateway
-- **[docs/NOTIFICATION_SERVICE_DESIGN.md](docs/NOTIFICATION_SERVICE_DESIGN.md)** — S7, shared across Java and Python
+- **[docs/SERVICE_DECOMPOSITION.md](docs/SERVICE_DECOMPOSITION.md)** — how many services and why: 6 + gateway
+- **[docs/NOTIFICATION_SERVICE_DESIGN.md](docs/NOTIFICATION_SERVICE_DESIGN.md)** — why it is a module in S2, not a 7th service
 - **[docs/PLATFORM_API_STRATEGY.md](docs/PLATFORM_API_STRATEGY.md)** — every capability as engine + adapter: 6 sellable APIs
 - **[docs/SELLABLE_API_DESIGN.md](docs/SELLABLE_API_DESIGN.md)** — the pattern worked through on Scan AI
 - **[docs/TENANCY_DESIGN.md](docs/TENANCY_DESIGN.md)** — multi-org work, when you need it

@@ -1,89 +1,65 @@
-# S7 — Notification Service
+# Notification — one owner, not one container
 
-> **Serves every Hekma service**, Java and Python alike.
+> **Decision: do NOT deploy notification as a separate microservice.**
 >
-> **Build from scratch?** No. Roughly 70% already exists in `hekma_api`. This is a
-> consolidation, not a greenfield build.
+> It becomes a **module inside S2 (CTMS, Java)** with a queue in front of it.
+> Deployable count stays at **6**.
+>
+> The queue boundary means promoting it to its own service later is a deployment
+> change, not a rewrite.
 
 ---
 
-## 1. Why it earns a service
+## 1. The two questions, separated
 
-Both stacks already send email and push **independently**:
+I previously conflated these. They have different answers.
 
-| | Email | Push | Device tokens |
-|---|---|---|---|
-| **Java** `hekma_api` | SendGrid — `SendGridEmailAdapter` (755 lines) | Firebase Admin SDK — `FirebasePushService` | `UserDeviceTokenService` |
-| **Python** `hekma_data_pipleline` | SendGrid + SMTP fallback — `email_sender.py` | Raw FCM HTTP — `notification_service.py` | `device_tokens_repo.py` |
+| Question | Answer |
+|----------|--------|
+| Does notification need **one owner**? | **Yes.** Two divergent SendGrid and Firebase integrations is a real defect. |
+| Does notification need **one container**? | **No.** Nothing about it is big enough or independent enough to pay for that. |
 
-Two SendGrid integrations, two Firebase integrations, two sets of credentials, two
-retry behaviours, no shared delivery log, no shared preferences.
-
-| Split test | Result |
-|------------|--------|
-| Different data ownership | Templates, preferences, device tokens, delivery log |
-| Different failure domain | A SendGrid outage must not fail an API request |
-| Needed by 2+ services | **Yes, today** |
-| Different scaling profile | Bursty batches — reminders every minute; ~300k/day at 100k patients |
+Consolidating ownership fixes the actual problem. Adding a deployable does not.
 
 ---
 
-## 2. ⚠️ Found while surveying: the two stacks use different Firebase APIs
+## 2. Why not a separate deployable
 
-| Stack | Mechanism | Status |
-|-------|-----------|--------|
-| **Java** | `FirebaseMessaging.getInstance().send(message)` — Firebase Admin SDK | **Current and correct** |
-| **Python** | `POST https://fcm.googleapis.com/fcm/send` with `Authorization: key=<server_key>` | **Legacy FCM HTTP API** |
+| Test | Verdict |
+|------|---------|
+| Is it large? | ~2,000 lines, almost all provider adapter code |
+| Does it scale differently? | Bursty, but trivially absorbed — a few hundred thousand sends/day is not load |
+| Independent failure domain? | **Already achieved by the queue**, not by the container |
+| Separately sellable? | No — SendGrid and Twilio own that market |
+| Separate team? | You have 2–3 engineers |
 
-The legacy FCM endpoint and server-key auth were deprecated by Google and retired in
-mid-2024. **Medication reminder push may be failing silently in production.**
+### The cost of being wrong
 
-Worth verifying before anything else — check whether `FCM_SERVER_KEY` is set and
-whether those requests are returning success. This consolidation fixes it either way,
-since the unified service uses the Admin SDK path.
+| | 6 deployables | 7 deployables |
+|---|---|---|
+| Combined availability at 99.9% each | 99.4% | 99.3% |
+| Maintenance tax | — | +0.5 eng-week per quarter, forever |
+| Infra | — | +~$150/mo |
+
+For a module whose job is to call two SaaS APIs, that is a bad trade.
 
 ---
 
-## 3. What already exists and can be reused
+## 3. Where it lives
 
-```mermaid
-flowchart LR
-    subgraph reuse ["Reuse — Java hekma_api"]
-        R1["SendGridEmailAdapter<br/>755 lines, mature"]
-        R2["EmailAdapter interface<br/>+ EmailTemplateBuilder"]
-        R3["19 .st templates<br/>OTP · appointments · support · invites"]
-        R4["FirebasePushService<br/>Admin SDK — correct API"]
-        R5["UserDeviceTokenService"]
-    end
+Java `hekma_api` already owns **~95%** of it — `SendGridEmailAdapter` (755 lines),
+`EmailTemplateBuilder`, 19 `.st` templates, `FirebasePushService` (Firebase Admin SDK),
+`UserDeviceTokenService`, `AppointmentReminderScheduler` (562 lines).
 
-    subgraph reuse2 ["Reuse — Python"]
-        R6["device_tokens_repo<br/>token registration"]
-        R7["medication_notification_repo<br/>delivery logging"]
-        R8["EmailSender interface<br/>SendGrid/SMTP/stub fallback"]
-    end
+Python's entire notification surface is **three call sites**:
 
-    subgraph build ["Build new"]
-        B1[Queue consumer]
-        B2[Unified event schema]
-        B3[User preferences]
-        B4[Retry + dead-letter]
-        B5[Unified delivery log]
-    end
-```
+| Python file | Called by | Disposition |
+|-------------|-----------|-------------|
+| `services/medications/notification_service.py` | 2 endpoints in `medications_api.py` | **Delete** — publish events instead |
+| `services/account_deletion/email_sender.py` | 1 call in `otp_service.py` | **Keep** — synchronous OTP, self-contained, works |
 
-| Asset | Where | Reuse |
-|-------|-------|-------|
-| SendGrid integration | Java `SendGridEmailAdapter` | **As-is** — the mature implementation |
-| Template engine + 19 templates | Java `EmailTemplateBuilder`, `resources/templates/*.st` | **As-is** |
-| Push via Admin SDK | Java `FirebasePushService` | **As-is** |
-| Device token storage | Java `UserDeviceTokenService`, Python `device_tokens_repo` | Merge into one store |
-| Delivery logging | Python `medication_notification_repo` | Extend into a unified log |
-| Provider fallback pattern | Python `email_sender.py` (SendGrid → SMTP → stub) | Good design — port the idea |
-| Scheduled reminders | Java `AppointmentReminderScheduler` (562 lines) | Move in, generalise |
-
-**Recommendation: build S7 in Java**, seeded from `hekma_api`'s email and push
-packages. That is where the mature code, the templates, and the correct Firebase API
-already live. Python's senders get deleted and replaced with event publishing.
+So "merging the two stacks" means changing three places in Python. That is the entire
+duplication problem.
 
 ---
 
@@ -91,77 +67,95 @@ already live. Python's senders get deleted and replaced with event publishing.
 
 ```mermaid
 flowchart TB
-    subgraph producers [Producers]
-        S1[S1 Identity]
-        S2[S2 CTMS]
-        S3[S3 Patient Health]
+    subgraph py ["S3 Patient Health · Python"]
+        MED[Medication reminders]
+        OTP[Account deletion OTP]
+    end
+    subgraph other [Other services]
         S4[S4 Clinical AI]
+        S5[S5 Trial Matching]
     end
 
-    Q[(Event Queue · SQS)]
-    API["Sync API<br/>/v1/notifications<br/>OTP only"]
+    Q[(Notification queue · SQS)]
 
-    S1 -->|password.reset| Q
-    S2 -->|appointment.created| Q
-    S3 -->|medication.due| Q
+    subgraph s2 ["S2 CTMS · Java"]
+        CTMS[CTMS features<br/>studies · appointments · support]
+        subgraph mod ["notification module"]
+            CONS[Queue consumer]
+            PREF{Preferences}
+            TPL[Template render]
+            EMAIL[SendGrid adapter]
+            PUSH[Firebase Admin adapter]
+            LOG[(Delivery log)]
+        end
+    end
+
+    MED -->|medication.due| Q
     S4 -->|scan.completed| Q
-    S1 -.->|OTP needs confirmation| API
+    S5 -->|match.found| Q
+    CTMS -->|appointment.created| Q
+    Q --> CONS --> PREF --> TPL --> EMAIL & PUSH
+    EMAIL & PUSH --> LOG
 
-    subgraph S7 ["S7 Notification Service · Java"]
-        CONS[Queue consumer]
-        PREF{Preference check}
-        TPL[Template render]
-        ROUTE{Channel router}
-        EMAIL[SendGrid adapter]
-        PUSH[Firebase Admin adapter]
-        LOG[(Delivery log)]
-        DLQ[(Dead letter)]
-    end
-
-    Q --> CONS
-    API --> PREF
-    CONS --> PREF
-    PREF -->|opted out| LOG
-    PREF -->|send| TPL
-    TPL --> ROUTE
-    ROUTE --> EMAIL
-    ROUTE --> PUSH
-    EMAIL --> LOG
-    PUSH --> LOG
-    EMAIL -.->|exhausted retries| DLQ
-    PUSH -.->|exhausted retries| DLQ
+    OTP -.->|stays synchronous<br/>SendGrid direct| SG[SendGrid]
 ```
 
-### Two entry paths
-
-| Path | Use | Why |
-|------|-----|-----|
-| **Event queue** — default | Appointments, reminders, tickets, scan completion | Sender never blocks or fails on provider outage |
-| **Sync API** — exception | OTP, password reset | Caller needs delivery confirmation before responding |
-
-Everything that can be asynchronous must be. A notification failure should never fail
-the business operation that triggered it.
+**The queue is the architecture.** It gives you the failure isolation, the retry
+behaviour, and the decoupling. A separate container would add none of that.
 
 ---
 
-## 5. What S7 owns
+## 5. What changes
 
-| Concern | Detail |
-|---------|--------|
-| **Templates** | The 19 `.st` files, plus new ones — versioned, one home |
-| **Preferences** | Per-user, per-channel, per-category opt-in/out |
-| **Device tokens** | Registration, platform, staleness pruning |
-| **Delivery log** | Every attempt: channel, status, provider response, timestamp |
-| **Retry policy** | Exponential backoff, bounded attempts, dead-letter queue |
-| **Provider abstraction** | SendGrid, Firebase today; SMS or WhatsApp later without touching callers |
-| **Scheduling** | Time-based sends — appointment reminders, medication doses |
-| **Rate limiting** | Per-user caps so a bug cannot spam a patient |
+| Step | Work | Size |
+|------|------|------|
+| 1 | Consolidate Java's email and push into one `notification` package inside S2, behind a single entry point | Code move |
+| 2 | Put an SQS consumer in front of it; add delivery log, preferences, retry, dead-letter | New code, contained |
+| 3 | Java call sites publish events instead of calling senders directly | Many small edits |
+| 4 | Python's 2 medication endpoints publish events; **delete `notification_service.py`** | Two call sites |
+| 5 | Merge device token storage into one table | Data migration |
+
+Python's OTP email stays exactly as it is. It is synchronous by necessity, self-contained,
+has a working SMTP fallback, and has no duplicate anywhere.
 
 ---
 
-## 6. Event contract
+## 6. ⚠️ Fix this independently of any refactor
 
-One schema for all producers:
+The two stacks use **different Firebase APIs**:
+
+| Stack | Mechanism | Status |
+|-------|-----------|--------|
+| Java | `FirebaseMessaging.getInstance().send()` — Admin SDK | Current |
+| Python | `POST https://fcm.googleapis.com/fcm/send`, `Authorization: key=<server_key>` | **Legacy — retired by Google mid-2024** |
+
+**Medication reminder push may be failing silently.** Verify whether `FCM_SERVER_KEY`
+is set and what those calls actually return. Step 4 above fixes it, but the check is
+worth doing now and does not depend on any of this design.
+
+---
+
+## 7. Build from scratch?
+
+**No.** About 70% exists and is reusable as-is:
+
+| Asset | Where | Reuse |
+|-------|-------|-------|
+| SendGrid integration | Java `SendGridEmailAdapter` (755 lines) | as-is |
+| Template engine + 19 templates | Java `EmailTemplateBuilder`, `resources/templates/*.st` | as-is |
+| Push via Admin SDK | Java `FirebasePushService` | as-is |
+| Device tokens | Java `UserDeviceTokenService` | as-is, absorb Python's |
+| Delivery logging | Python `medication_notification_repo` | extend to all channels |
+| Scheduler | Java `AppointmentReminderScheduler` (562 lines) | generalise for medication doses |
+
+Genuinely new: the queue consumer, the event schema, preferences, and retry/dead-letter.
+
+---
+
+## 8. Event contract
+
+Producers state **what happened and who it concerns**. They never render content —
+that is what lets you reword an email without redeploying four services.
 
 ```json
 {
@@ -170,60 +164,29 @@ One schema for all producers:
   "recipient": { "user_id": "203022", "channels": ["push", "email"] },
   "template": "medication_reminder",
   "data": { "medication_name": "Metformin", "dose_time": "08:00" },
-  "priority": "normal",
   "occurred_at": "2026-10-03T08:00:00Z"
 }
 ```
 
-| Field | Rule |
-|-------|------|
-| `event_id` | Idempotency key — the consumer must deduplicate |
-| `recipient.channels` | A request, not a guarantee; preferences override |
-| `template` | Resolved by S7; producers never build message bodies |
-| `priority` | Routes to a fast or batch queue |
+`event_id` is the idempotency key — the consumer deduplicates on it.
+`recipient.channels` is a request, not a guarantee; preferences override it.
 
-**Producers never render content.** They state what happened and who it concerns. That
-is what lets you change wording without redeploying four services.
+**This contract is the real investment.** It is what makes the deployment question
+reversible.
 
 ---
 
-## 7. Migration
+## 9. When to promote it to its own service
 
-```mermaid
-flowchart LR
-    M1["1 · Extract from Java<br/>email + push + templates → S7"]
-    M2["2 · Add queue consumer<br/>+ delivery log + preferences"]
-    M3["3 · Java publishes events<br/>instead of sending directly"]
-    M4["4 · Python publishes events<br/>delete its senders"]
-    M5["5 · Move the scheduler in"]
-    M1 --> M2 --> M3 --> M4 --> M5
-```
+Revisit if any of these becomes true:
 
-| Step | Work | Risk |
-|------|------|------|
-| 1 | New Java service seeded with `email/`, `FirebasePushService`, `UserDeviceTokenService`, templates | Low — a code move |
-| 2 | SQS consumer, unified delivery log, preference table, retry and DLQ | Medium — new code |
-| 3 | Replace direct sends in `hekma_api` with event publishing | Medium — many call sites |
-| 4 | Replace Python's `email_sender.py` and `notification_service.py` with publishing; **fixes the legacy FCM issue** | Low — only two files |
-| 5 | Move `AppointmentReminderScheduler` into S7 and generalise for medication reminders | Medium |
+- Notification volume forces S2 to scale for reasons unrelated to CTMS load
+- A third consumer appears that is neither Java nor the Python monolith
+- An external customer's traffic shares the queue and could starve Hekma's
+- The team passes roughly 6 engineers
 
-Step 4 is worth doing early and independently — it is small and it resolves the
-possibly-dead push path.
-
----
-
-## 8. Build or extend?
-
-| | Verdict |
-|---|---------|
-| Build from scratch | **No** |
-| Already exists | ~70% — SendGrid adapter, template engine, 19 templates, Firebase Admin integration, device tokens, delivery logging |
-| Genuinely new | Queue consumer, event schema, preferences, retry/DLQ, unified log |
-| Language | **Java**, seeded from `hekma_api` — the mature code and correct Firebase API live there |
-| Effort shape | Consolidation and plumbing, not algorithm work |
-
-The main cost is not writing the service. It is **replacing every direct send call
-across both stacks with an event publish**.
+Because producers already talk to a queue and never to the module directly, promotion
+is a deployment change. Nothing above the queue has to be rewritten.
 
 ---
 

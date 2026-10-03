@@ -111,10 +111,8 @@ flowchart TB
 | **S4** | Document Intelligence | `hekma_data_pipleline` | Scanning, OCR, AI extraction |
 | **S5** | Trial Matching | `TrialGPT` — exists | Patient↔trial matching, vectors |
 | **S6** | Privacy Shield | `PHI-PII` — exists | Anonymization, tokenization |
-| **S7** | Notification | `hekma_api` email/push | Email, push, templates, preferences, delivery log |
 
-**Each monolith splits in two, plus a shared notification service. Three to build,
-four already exist.**
+**Each monolith splits in two. That is the whole decomposition.**
 
 ---
 
@@ -151,10 +149,7 @@ same Redis blacklist keys. Extracting it removes that shared secret.
 | Support, Files, Webhooks inside CTMS | Features of CTMS, not products |
 | Marketplace inside CTMS | Shares study and patient data heavily |
 
-> **Revised:** Notification was originally kept inside CTMS here. On inspection, Java
-> and Python already run **separate** SendGrid and Firebase integrations, so it has two
-> consumers today and meets the split tests. It is now **S7** — see
-> [NOTIFICATION_SERVICE_DESIGN.md](./NOTIFICATION_SERVICE_DESIGN.md).
+| Notification inside CTMS | Java already owns ~95% of it. It gets **one owner and a queue**, not its own container — see [NOTIFICATION_SERVICE_DESIGN.md](./NOTIFICATION_SERVICE_DESIGN.md) |
 
 ---
 
