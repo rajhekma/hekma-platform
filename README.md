@@ -44,6 +44,7 @@ hekma-platform/
 - **[docs/PLATFORM_API_STRATEGY.md](docs/PLATFORM_API_STRATEGY.md)** — every capability as engine + adapter: 6 sellable APIs
 - **[docs/SELLABLE_API_DESIGN.md](docs/SELLABLE_API_DESIGN.md)** — the pattern worked through on Scan AI
 - **[docs/TENANCY_DESIGN.md](docs/TENANCY_DESIGN.md)** — multi-org work, when you need it
+- **[docs/MONETIZATION_ROADMAP.md](docs/MONETIZATION_ROADMAP.md)** — subscriptions, metering, tenancy: roadmap for leadership
 - [docs/TENANCY_LEADERSHIP_OVERVIEW.md](docs/TENANCY_LEADERSHIP_OVERVIEW.md) — business-level, for leadership
 - [GitHub setup](docs/GITHUB_SETUP.md)
 - `docs/archive/` — rejected plans, reference only

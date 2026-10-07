@@ -1,4 +1,4 @@
-# Multi-Tenancy — Leadership Overview
+# Multi-Tenancy Design
 
 **One-line summary:** our platform can serve exactly one customer today. This project
 makes it able to serve many, each fully isolated from the others. It is the
@@ -30,11 +30,15 @@ flowchart LR
     C3 -.->|cannot onboard| APP
 ```
 
+
+
 If we onboarded a hospital tomorrow, their patient data and ours would sit in the
 same tables with nothing distinguishing them. That is a commercial blocker and a
 compliance risk.
 
 ---
+
+
 
 ## 2. The solution
 
@@ -55,10 +59,14 @@ flowchart LR
     end
 ```
 
+
+
 Each customer sees only their own data. They cannot see — or even address — another
 customer's records. One platform, many isolated workspaces.
 
 ---
+
+
 
 ## 3. What a customer experiences
 
@@ -73,15 +81,21 @@ flowchart TB
     A --> B --> C --> D --> E --> F
 ```
 
+
+
 Three capabilities are created by this work, and none of them exist today:
 
-| Capability | Meaning |
-|------------|---------|
-| **Isolation** | Customers never see each other's data |
+
+| Capability      | Meaning                                           |
+| --------------- | ------------------------------------------------- |
+| **Isolation**   | Customers never see each other's data             |
 | **Entitlement** | Customers access only the products they purchased |
-| **Metering** | We can measure and bill actual usage |
+| **Metering**    | We can measure and bill actual usage              |
+
 
 ---
+
+
 
 ## 4. What this unlocks commercially
 
@@ -107,26 +121,34 @@ flowchart TB
     P6 --> B5[Pharma · Payers]
 ```
 
+
+
 **Scan AI is the first product to take to market** — it is a self-contained API, its
 value is immediately measurable, and it has the widest set of potential buyers.
 
 ---
+
+
 
 ## 5. Why this is also a compliance requirement
 
 Tenant isolation is not only a commercial feature. Enterprise healthcare buyers will
 not sign without it.
 
-| Requirement | Why isolation is required |
-|-------------|---------------------------|
-| **HIPAA / BAA** | Each customer's PHI must be demonstrably separated |
-| **Procurement review** | Hospitals audit data separation before signing |
-| **Breach containment** | An incident is scoped to one customer, not all |
-| **Right to deletion** | We must be able to remove one customer's data completely |
+
+| Requirement            | Why isolation is required                                |
+| ---------------------- | -------------------------------------------------------- |
+| **HIPAA / BAA**        | Each customer's PHI must be demonstrably separated       |
+| **Procurement review** | Hospitals audit data separation before signing           |
+| **Breach containment** | An incident is scoped to one customer, not all           |
+| **Right to deletion**  | We must be able to remove one customer's data completely |
+
 
 Without this work, we cannot credibly answer a hospital's security questionnaire.
 
 ---
+
+
 
 ## 6. Delivery plan
 
@@ -143,29 +165,39 @@ flowchart LR
     S0 --> S1 --> S2 --> S3 --> S4
 ```
 
-| Stage | Outcome | Commercial milestone |
-|-------|---------|---------------------|
-| 0 | Customer model exists; all current data assigned to Hekma | — |
-| 1 | Scan AI isolated, entitled, metered | **First external customer can be onboarded** |
-| 2 | Medication products isolated | Pharma / payer deals become possible |
-| 3 | Patient 360 isolated | Health-system deals become possible |
-| 4 | CTMS isolated | Sponsor / CRO deals become possible |
+
+
+
+| Stage | Outcome                                                   | Commercial milestone                         |
+| ----- | --------------------------------------------------------- | -------------------------------------------- |
+| 0     | Customer model exists; all current data assigned to Hekma | —                                            |
+| 1     | Scan AI isolated, entitled, metered                       | **First external customer can be onboarded** |
+| 2     | Medication products isolated                              | Pharma / payer deals become possible         |
+| 3     | Patient 360 isolated                                      | Health-system deals become possible          |
+| 4     | CTMS isolated                                             | Sponsor / CRO deals become possible          |
+
 
 Each stage is independently deliverable and reversible. Revenue can begin at Stage 1
 without waiting for the rest.
 
 ---
 
+
+
 ## 7. Investment and risk
 
-| Dimension | Assessment |
-|-----------|------------|
-| **Nature of work** | Foundational — touches most of the platform's data layer |
-| **Customer-visible disruption** | None; current users are unaffected throughout |
-| **Cost of delay** | Rises every month — the change grows with the codebase |
-| **Infrastructure cost** | Negligible; no new systems, one shared platform |
-| **Primary risk** | A missed isolation check leaking data across customers |
-| **Risk control** | Automated isolation testing on every release, plus database-level enforcement as a second layer |
+
+| Dimension                       | Assessment                                                                                      |
+| ------------------------------- | ----------------------------------------------------------------------------------------------- |
+| **Nature of work**              | Foundational — touches most of the platform's data layer                                        |
+| **Customer-visible disruption** | None; current users are unaffected throughout                                                   |
+| **Cost of delay**               | Rises every month — the change grows with the codebase                                          |
+| **Infrastructure cost**         | Negligible; no new systems, one shared platform                                                 |
+| **Primary risk**                | A missed isolation check leaking data across customers                                          |
+| **Risk control**                | Automated isolation testing on every release, plus database-level enforcement as a second layer |
+
+
+
 
 ### Why now rather than later
 
@@ -177,15 +209,19 @@ product work makes the platform sellable without it.
 
 ---
 
+
+
 ## 8. The decision
 
-| | Without this work | With this work |
-|---|---|---|
-| Customers we can serve | 1 | Many |
-| Products we can sell | 0 | 6 |
-| Enterprise procurement | Fails | Passes |
-| Usage-based billing | Not possible | Supported |
-| Time to first external customer | Never | End of Stage 1 |
+
+|                                 | Without this work | With this work |
+| ------------------------------- | ----------------- | -------------- |
+| Customers we can serve          | 1                 | Many           |
+| Products we can sell            | 0                 | 6              |
+| Enterprise procurement          | Fails             | Passes         |
+| Usage-based billing             | Not possible      | Supported      |
+| Time to first external customer | Never             | End of Stage 1 |
+
 
 **Recommendation:** approve Stages 0 and 1 now. They convert the platform from an
 internal system into a sellable product, and Stage 1 ends with the first customer
