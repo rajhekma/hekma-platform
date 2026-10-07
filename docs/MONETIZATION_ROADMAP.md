@@ -1,6 +1,6 @@
 # Monetization Roadmap
 
-**For:** Senior leadership · **Date:** October 2026
+**Date:** October 2026
 **Team assumption:** 2–3 engineers building with Cursor
 
 ---
@@ -9,12 +9,10 @@
 
 | Service | What it does | Time |
 |---------|--------------|------|
-| **1 · Subscriptions** | Customers pay us monthly | **6 weeks** |
+| **1 · Subscriptions** | Customers pay us monthly | **4 weeks** |
 | **2 · Metering** | Track usage, charge for it | **4 weeks** |
-| **3 · Multi-tenancy** | Sell to organizations, not just individuals | **10 weeks** |
+| **3 · Multi-tenancy** | Sell to organizations, not just individuals | **6 weeks** |
 
-**First revenue: ~6 weeks.** Multi-tenancy is only needed if we sell to
-organizations — not for individual patient subscriptions.
 
 > Subscriptions and Metering ship as **one deployable**. They share customer, plan,
 > and usage data. Shown separately here because they are separate milestones.
@@ -28,17 +26,26 @@ cancellations, failed payments. Tells the rest of the platform **what this custo
 is allowed to use**.
 
 ```mermaid
-flowchart LR
+flowchart TB
     APP[Patient App] --> GW[API Gateway]
-    GW -->|paid up?| ENT[Entitlements]
-    GW --> SVC[Our Services]
-    SUB[Subscriptions] --> ENT
-    SUB <--> STRIPE[Stripe]
+
+    subgraph COM ["Commerce Service"]
+        direction LR
+        SUB[Subscriptions<br/>plans · renewals · payments] -->|sets| ENT[Entitlements<br/>what can this customer use?]
+    end
+
+    GW -->|"① is this customer paid up?"| ENT
+    GW -->|"② if yes, continue"| SVC[Our Services<br/>scans · records · reminders]
+    STRIPE[Stripe] <-->|payments| SUB
 ```
+
+**Entitlement** = what a paying customer is allowed to use right now. Subscriptions
+handles the messy part — trials, failed cards, cancellations — and publishes one
+simple answer the rest of the platform can check.
 
 | | |
 |---|---|
-| **Time** | 6 weeks |
+| **Time** | 4 weeks |
 | **Already have** | Stripe one-time payments (159 lines) |
 | **Need to build** | Plans, recurring billing, entitlements, webhooks |
 | **Main risk** | Payment edge cases — failed charges, refunds, proration |
@@ -84,7 +91,7 @@ flowchart TB
 
 | | |
 |---|---|
-| **Time** | 10 weeks |
+| **Time** | 6 weeks |
 | **Already have** | A working model in the privacy service to copy |
 | **Need to build** | Organization tagging across ~130 tables, backfill, access rules |
 | **Main risk** | Touching every table in the platform |
@@ -129,25 +136,9 @@ flowchart LR
 
 **Who do we charge first?**
 
-| | Patients (B2C) | Organizations (B2B) |
-|---|---|---|
-| Multi-tenancy needed | **No** | **Yes — first** |
-| Time to revenue | **~2 months** | ~5 months |
 
 **Recommendation: start with patient subscriptions.** Faster, independent, and
 revenue starts while any B2B work proceeds separately.
 
 ---
 
-## A note on timelines
-
-These estimates assume Cursor is used throughout.
-
-AI speeds up **writing new code** by roughly 30–50%, and **safely changing existing
-systems** by closer to 10%. Subscriptions and Metering are mostly the first kind.
-Multi-tenancy is mostly the second — which is why it carries the longest timeline
-despite being conceptually simple.
-
----
-
-*Detail: [ARCHITECTURE.md](./ARCHITECTURE.md) · [TENANCY_DESIGN.md](./TENANCY_DESIGN.md)*
