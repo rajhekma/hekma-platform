@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hekma.health/schemas/ai.usage.recorded.v1.json",
+  "title": "ai.usage.recorded",
+  "description": "One LLM HTTP call attributed to a patient. No prompts, completions, or PHI.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "occurred_at",
+    "patient_id",
+    "product",
+    "provider",
+    "model",
+    "prompt_tokens",
+    "completion_tokens"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "request_id": { "type": "string", "format": "uuid" },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "tenant_id": { "type": "integer", "minimum": 1, "default": 1 },
+    "patient_id": { "type": "string", "minLength": 1 },
+    "product": {
+      "type": "string",
+      "enum": ["scan_ai", "patient_summary", "trial_match"]
+    },
+    "feature": { "type": "string" },
+    "provider": {
+      "type": "string",
+      "enum": ["openai", "anthropic", "google", "groq", "azure_openai", "other"]
+    },
+    "model": { "type": "string", "minLength": 1 },
+    "prompt_tokens": { "type": "integer", "minimum": 0 },
+    "completion_tokens": { "type": "integer", "minimum": 0 },
+    "total_tokens": { "type": "integer", "minimum": 0 },
+    "cached": { "type": "boolean", "default": false },
+    "job_id": { "type": ["string", "null"] },
+    "source_service": { "type": "string" }
+  }
+}

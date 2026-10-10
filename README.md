@@ -12,6 +12,7 @@ cp .env.example .env
 | Service | URL / port |
 |---------|------------|
 | API Gateway (nginx) | http://localhost:9080 |
+| AI Usage API | http://localhost:8090 |
 | PostgreSQL | `localhost:5433` (user `hekma`, db `hekma_platform`) |
 | MySQL (CTMS) | `localhost:3307` |
 | Redis | `localhost:6379` |
@@ -26,12 +27,15 @@ Point existing monoliths at these hosts while you extract microservices:
 
 ```
 hekma-platform/
+├── ai-usage/             # patient AI usage: backend API + local dashboard
+│   ├── backend/          # ingest, pricing, query API, emitter library
+│   └── frontend/         # monitoring dashboard (local only)
 ├── api-gateway/          # nginx routes (monolith → new services)
-├── docker-compose.yml    # local Postgres, MySQL, Redis, LocalStack, gateway
+├── docker-compose.yml    # local Postgres, MySQL, Redis, LocalStack, gateway, AI usage
 ├── docs/                 # architecture & setup guides
 ├── event-schemas/        # async event contracts (SQS)
 ├── scripts/              # local-dev helpers
-└── shared/               # auth libraries (added in Phase 2)
+└── shared/               # cross-service libraries (auth, later)
 ```
 
 ## Docs
@@ -46,6 +50,9 @@ hekma-platform/
 - **[docs/TENANCY_DESIGN.md](docs/TENANCY_DESIGN.md)** — multi-org work, when you need it
 - **[docs/MONETIZATION_ROADMAP.md](docs/MONETIZATION_ROADMAP.md)** — subscriptions, metering, tenancy: roadmap for leadership
 - [docs/TENANCY_LEADERSHIP_OVERVIEW.md](docs/TENANCY_LEADERSHIP_OVERVIEW.md) — business-level, for leadership
+- [ai-usage/docs/AI_USAGE_OVERVIEW.md](ai-usage/docs/AI_USAGE_OVERVIEW.md) — why AI Usage exists and the architecture choices
+- [ai-usage/docs/AI_USAGE_HLD.md](ai-usage/docs/AI_USAGE_HLD.md) — developer design: components, APIs, pricing, how to emit
+- [ai-usage/docs/AI_COST_ANALYTICS.md](ai-usage/docs/AI_COST_ANALYTICS.md) — short API reference for the same service
 - [GitHub setup](docs/GITHUB_SETUP.md)
 - `docs/archive/` — rejected plans, reference only
 

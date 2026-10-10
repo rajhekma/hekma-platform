@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HEKMA · Patient AI cost</title>
+  <style>
+    :root {
+      --navy: #1b2b4b;
+      --navy-2: #243656;
+      --navy-deep: #142038;
+      --ink: #1e293b;
+      --muted: #64748b;
+      --line: #e6ebf2;
+      --bg: #f3f5f8;
+      --card: #ffffff;
+      --pink: #e23d8a;
+      --pink-deep: #c026d3;
+      --blue-head: #e7f1fb;
+      --blue-ink: #3d6ea5;
+      --gold: #d4a017;
+      --sky: #2f9bc4;
+      --lilac: #7b6bb5;
+      --ok: #15803d;
+      --danger: #b42318;
+      --shadow: 0 8px 24px rgba(20, 32, 56, 0.06);
+      --sidebar: 248px;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font: 14px/1.45 "Avenir Next", "Segoe UI", sans-serif;
+    }
+    button, input { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    .app { display: flex; min-height: 100%; }
+
+    .sidebar {
+      width: var(--sidebar);
+      flex: 0 0 var(--sidebar);
+      background: var(--navy);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 18px 14px 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 8px 22px;
+    }
+    .mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 35%, #fff 0 18%, transparent 19%),
+        linear-gradient(135deg, #f472b6, #a855f7 55%, #38bdf8);
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.35);
+    }
+    .brand strong {
+      letter-spacing: 0.16em;
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .nav { display: flex; flex-direction: column; gap: 4px; }
+    .nav button {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      color: rgba(255,255,255,.82);
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+    .nav button svg { flex: 0 0 auto; opacity: .9; }
+    .nav button.active,
+    .nav button:hover { background: var(--navy-2); color: #fff; }
+    .nav button.active { box-shadow: inset 3px 0 0 #7dd3fc; }
+    .sidebar .grow { flex: 1; }
+
+    .main { flex: 1; min-width: 0; }
+    .topbar {
+      height: 64px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+    .topbar .who { color: var(--muted); }
+    .topbar .who b { color: var(--ink); font-weight: 600; }
+    .patient-field { display: flex; align-items: center; gap: 8px; }
+    .patient-field label { color: var(--muted); font-size: 13px; }
+    .patient-field input {
+      width: 140px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 14px;
+      background: #fff;
+    }
+    .page { padding: 26px 28px 48px; }
+    .title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    h1 { margin: 0; font-size: 28px; font-weight: 650; letter-spacing: -0.02em; }
+    .sub { margin: 4px 0 0; color: var(--muted); }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn {
+      background: var(--navy);
+      color: #fff;
+      border: 0;
+      border-radius: 999px;
+      padding: 9px 16px;
+      font-weight: 650;
+      letter-spacing: .02em;
+    }
+    .btn.ghost { background: #fff; color: var(--navy); border: 1px solid #d5dce6; }
+    .btn:disabled { opacity: .55; cursor: wait; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: minmax(280px, .9fr) 1.4fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .grid-main {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(280px, .85fr);
+      gap: 16px;
+      align-items: start;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(230, 235, 242, .9);
+      padding: 18px 18px 16px;
+    }
+    .card h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 650;
+      background: var(--blue-head);
+      color: var(--blue-ink);
+    }
+    .identity { width: 100%; border-collapse: collapse; }
+    .identity th, .identity td { text-align: left; padding: 7px 0; font-weight: 500; }
+    .identity th { color: var(--muted); font-weight: 500; width: 42%; }
+    .identity td { font-variant-numeric: tabular-nums; }
+
+    .medals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .medal {
+      border: 1px solid transparent;
+      background: #f8fafc;
+      border-radius: 14px;
+      padding: 12px 8px 10px;
+      text-align: center;
+    }
+    .medal.active { border-color: var(--navy); background: #fff; box-shadow: inset 0 0 0 1px var(--navy); }
+    .ring {
+      width: 74px;
+      height: 74px;
+      margin: 0 auto 8px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: conic-gradient(var(--c) calc(var(--p) * 1%), #e8edf3 0);
+    }
+    .ring span {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+    .medal b { display: block; font-size: 13px; }
+    .medal small { color: var(--muted); }
+
+    .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+    .kpi .label { color: var(--muted); font-size: 12px; font-weight: 650; letter-spacing: .04em; text-transform: uppercase; }
+    .kpi .value { margin-top: 6px; font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+    .kpi .hint { color: var(--muted); font-size: 12px; margin-top: 2px; }
+
+    .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+    .chip, .search {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 999px;
+      padding: 6px 12px;
+    }
+    .chip.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+    .search { min-width: 180px; flex: 1; }
+
+    table.calls, table.features, table.prices { width: 100%; border-collapse: collapse; }
+    table.calls th, table.features th, table.prices th {
+      text-align: left;
+      font-size: 12px;
+      font-weight: 650;
+      color: var(--blue-ink);
+      background: var(--blue-head);
+      padding: 8px 10px;
+    }
+    table.calls th:first-child, table.features th:first-child, table.prices th:first-child { border-radius: 8px 0 0 8px; }
+    table.calls th:last-child, table.features th:last-child, table.prices th:last-child { border-radius: 0 8px 8px 0; }
+    table.calls td, table.features td, table.prices td {
+      padding: 10px;
+      border-bottom: 1px solid #f1f4f8;
+      font-variant-numeric: tabular-nums;
+      vertical-align: middle;
+    }
+    table.calls tbody tr { cursor: pointer; }
+    table.calls tbody tr:hover { background: #f8fbfe; }
+    table.calls tbody tr.selected { background: #eef6ff; }
+    table.calls th button {
+      background: none;
+      border: 0;
+      padding: 0;
+      color: inherit;
+      font-weight: 650;
+    }
+    .tag {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 12px;
+      font-weight: 650;
+      background: #f1f5f9;
+    }
+    .tag.scan_ai { background: #fff6dc; color: #8a6a08; }
+    .tag.patient_summary { background: #e6f6fb; color: #0e7490; }
+    .tag.trial_match { background: #f3eefe; color: #6d28d9; }
+    .status-ok { color: var(--ok); font-weight: 650; }
+    .status-bad { color: var(--danger); font-weight: 650; }
+    .empty {
+      padding: 28px 8px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .bar-row { display: grid; grid-template-columns: 92px 1fr auto; gap: 8px; align-items: center; margin: 10px 0; width: 100%; background: none; border: 0; text-align: left; padding: 4px; border-radius: 8px; }
+    .bar-row.active { background: #f4f7fb; }
+    .track { height: 8px; background: #eef2f6; border-radius: 99px; overflow: hidden; }
+    .track i { display: block; height: 100%; border-radius: 99px; width: 0; }
+    .split { display: flex; height: 14px; border-radius: 99px; overflow: hidden; background: #eef2f6; margin: 8px 0 12px; }
+    .split i:first-child { background: var(--navy); }
+    .split i:last-child { background: var(--sky); }
+    .legend { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; }
+
+    .stack { display: flex; flex-direction: column; gap: 16px; }
+    .note { margin: 10px 0 0; color: var(--muted); }
+    .note:empty { display: none; }
+    .note.err { color: var(--danger); }
+
+    .drawer-back {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 32, 56, .28);
+      z-index: 20;
+    }
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      height: 100%;
+      width: min(420px, 100%);
+      background: #fff;
+      z-index: 21;
+      box-shadow: -12px 0 40px rgba(20, 32, 56, .12);
+      padding: 22px 22px 32px;
+      overflow: auto;
+    }
+    .drawer h3 { margin: 8px 0 4px; font-size: 20px; }
+    .drawer .money { font-size: 32px; font-weight: 700; font-variant-numeric: tabular-nums; margin: 8px 0 14px; }
+    .kv { width: 100%; border-collapse: collapse; }
+    .kv th, .kv td { text-align: left; padding: 8px 0; border-bottom: 1px solid #f1f4f8; vertical-align: top; }
+    .kv th { color: var(--muted); font-weight: 500; width: 42%; }
+    .formula {
+      margin-top: 14px;
+      background: var(--navy-deep);
+      color: #e8eef8;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+    .icon-btn { background: none; border: 0; color: var(--muted); float: right; font-size: 20px; line-height: 1; }
+    .hidden { display: none !important; }
+
+    @media (max-width: 1100px) {
+      .grid-2, .grid-main, .kpis, .medals, .compare { grid-template-columns: 1fr 1fr; }
+      .kpis { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 800px) {
+      .sidebar { display: none; }
+      .grid-2, .grid-main, .medals, .compare, .kpis { grid-template-columns: 1fr; }
+      .page, .topbar { padding-left: 16px; padding-right: 16px; }
+      .title-row { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><span class="mark" aria-hidden="true"></span><strong>HEKMA</strong></div>
+      <nav class="nav">
+        <button type="button" data-go="overview" class="active">Overview</button>
+        <button type="button" data-go="services">Services</button>
+        <button type="button" data-go="calls">API calls</button>
+        <button type="button" data-go="prices">Price catalog</button>
+      </nav>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <div class="who">Patient AI cost · <b id="hello-id">203664</b></div>
+        <div class="patient-field">
+          <label for="patient">Patient id</label>
+          <input id="patient" value="203664" inputmode="numeric" />
+        </div>
+      </header>
+
+      <div class="page" id="dashboard">
+        <div class="title-row" id="overview">
+          <div>
+            <h1>AI cost</h1>
+            <p class="sub">Each Scan AI, Health Summary, and Trial Match call, priced when it happened.</p>
+          </div>
+          <div class="actions">
+            <button class="btn" id="refresh" type="button">Refresh</button>
+          </div>
+        </div>
+
+        <section class="kpis" aria-label="Totals">
+          <article class="card kpi"><div class="label">Total cost</div><div class="value" id="kpi-cost">—</div><div class="hint">USD, frozen at ingest</div></article>
+          <article class="card kpi"><div class="label">API calls</div><div class="value" id="kpi-calls">—</div><div class="hint" id="kpi-unpriced">Successful model calls</div></article>
+          <article class="card kpi"><div class="label">Tokens</div><div class="value" id="kpi-tokens">—</div><div class="hint" id="kpi-split">Prompt + completion</div></article>
+          <article class="card kpi"><div class="label">Last call</div><div class="value" id="kpi-last">—</div><div class="hint" id="kpi-last-hint">No calls yet</div></article>
+        </section>
+
+        <section class="grid-2" id="services">
+          <article class="card">
+            <div class="card-head"><h2>Patient</h2><span class="pill" id="currency">USD</span></div>
+            <table class="identity">
+              <tr><th>Patient id</th><td id="id-patient">—</td></tr>
+              <tr><th>Services with spend</th><td id="id-services">—</td></tr>
+              <tr><th>Providers</th><td id="id-providers">—</td></tr>
+              <tr><th>Prompt tokens</th><td id="id-prompt">—</td></tr>
+              <tr><th>Completion tokens</th><td id="id-completion">—</td></tr>
+            </table>
+          </article>
+          <article class="card">
+            <div class="card-head">
+              <h2>By service</h2>
+              <span class="pill">Click a service to filter</span>
+            </div>
+            <div class="medals" id="medals"></div>
+          </article>
+        </section>
+
+        <section class="grid-main">
+          <div class="stack">
+            <article class="card" id="calls">
+              <div class="card-head">
+                <h2>API calls</h2>
+                <span class="pill" id="call-count">0 calls</span>
+              </div>
+              <div class="filters">
+                <button class="chip active" type="button" data-product="">All services</button>
+                <button class="chip" type="button" data-product="scan_ai">Scan AI</button>
+                <button class="chip" type="button" data-product="patient_summary">Health Summary</button>
+                <button class="chip" type="button" data-product="trial_match">Trial Match</button>
+                <input class="search" id="q" placeholder="Search feature or model" />
+              </div>
+              <div id="feature-box"></div>
+              <div style="overflow:auto">
+                <table class="calls">
+                  <thead>
+                    <tr>
+                      <th><button type="button" data-sort="time">Time</button></th>
+                      <th><button type="button" data-sort="service">Service</button></th>
+                      <th>Feature</th>
+                      <th><button type="button" data-sort="model">Model</button></th>
+                      <th><button type="button" data-sort="tokens">Tokens</button></th>
+                      <th><button type="button" data-sort="cost">Cost</button></th>
+                    </tr>
+                  </thead>
+                  <tbody id="call-body"></tbody>
+                </table>
+              </div>
+            </article>
+            <p class="note" id="status"></p>
+          </div>
+
+          <div class="stack">
+            <article class="card">
+              <div class="card-head"><h2>By provider</h2></div>
+              <div id="providers"></div>
+              <div class="legend"><span>Share of this patient's USD cost</span></div>
+            </article>
+            <article class="card">
+              <div class="card-head"><h2>Token mix</h2></div>
+              <div class="split" id="split" title="Prompt versus completion"><i></i><i></i></div>
+              <div class="legend"><span id="leg-in">Prompt</span><span id="leg-out">Completion</span></div>
+            </article>
+          </div>
+        </section>
+      </div>
+
+      <div class="page hidden" id="catalog-page">
+        <div class="title-row">
+          <div>
+            <h1>Price catalog</h1>
+            <p class="sub">List price used when a call is recorded. USD per 1 million tokens.</p>
+          </div>
+        </div>
+        <article class="card">
+          <div style="overflow:auto">
+            <table class="prices">
+              <thead><tr><th>Provider</th><th>Model</th><th>Input</th><th>Output</th></tr></thead>
+              <tbody id="price-body"></tbody>
+            </table>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+
+  <div id="drawer-back" class="drawer-back hidden"></div>
+  <aside id="drawer" class="drawer hidden" aria-label="Call detail"></aside>
+
+  <script>
+    const PRODUCTS = {
+      scan_ai: { label: "Scan AI", color: "#d4a017" },
+      patient_summary: { label: "Health Summary", color: "#2f9bc4" },
+      trial_match: { label: "Trial Match", color: "#7b6bb5" },
+    };
+    const PROVIDERS = {
+      openai: "OpenAI",
+      anthropic: "Claude",
+      google: "Gemini",
+      groq: "Groq",
+    };
+    const $ = (id) => document.getElementById(id);
+    const state = {
+      cost: null,
+      events: [],
+      prices: [],
+      product: "",
+      provider: "",
+      feature: "",
+      q: "",
+      sort: "time",
+      dir: "desc",
+      selected: null,
+    };
+
+    const money = (n) => {
+      const v = Number(n || 0);
+      if (!Number.isFinite(v)) return "—";
+      return "$" + v.toFixed(6);
+    };
+    const compact = (n) => Number(n || 0).toLocaleString();
+    const providerName = (p) => PROVIDERS[p] || p || "Other";
+    const productName = (p) => (PRODUCTS[p] && PRODUCTS[p].label) || p || "—";
+    const featureName = (f) => (f || "call").replaceAll("_", " ").replaceAll(".", " · ");
+
+    function when(iso) {
+      if (!iso) return "—";
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return iso;
+      return d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+    }
+
+    function matchPrice(event) {
+      const rows = state.prices.filter((p) => p.provider === event.provider);
+      const exact = rows.find((p) => p.model === event.model);
+      if (exact) return exact;
+      const prefixes = rows
+        .filter((p) => event.model === p.model || event.model.startsWith(p.model + "-") || event.model.startsWith(p.model + ".") || event.model.startsWith(p.model + "/"))
+        .sort((a, b) => b.model.length - a.model.length);
+      return prefixes[0] || null;
+    }
+
+    function visibleEvents() {
+      const q = state.q.trim().toLowerCase();
+      const rows = state.events.filter((e) => {
+        if (state.product && e.product !== state.product) return false;
+        if (state.provider && e.provider !== state.provider) return false;
+        if (state.feature && e.feature !== state.feature) return false;
+        if (!q) return true;
+        return `${e.feature} ${e.model} ${e.product} ${e.provider} ${e.source_service || ""}`.toLowerCase().includes(q);
+      });
+      const dir = state.dir === "asc" ? 1 : -1;
+      rows.sort((a, b) => {
+        if (state.sort === "cost") return (a.cost_usd - b.cost_usd) * dir;
+        if (state.sort === "tokens") return (a.total_tokens - b.total_tokens) * dir;
+        if (state.sort === "model") return a.model.localeCompare(b.model) * dir;
+        if (state.sort === "service") return a.product.localeCompare(b.product) * dir;
+        return (new Date(a.occurred_at) - new Date(b.occurred_at)) * dir;
+      });
+      return rows;
+    }
+
+    function paintTotals() {
+      const t = (state.cost && state.cost.totals) || {};
+      $("kpi-cost").textContent = money(t.cost_usd);
+      $("kpi-calls").textContent = compact(t.llm_calls);
+      $("kpi-tokens").textContent = compact(t.total_tokens);
+      $("kpi-split").textContent = `${compact(t.prompt_tokens)} in · ${compact(t.completion_tokens)} out`;
+      const unpriced = Number(t.unpriced_calls || 0);
+      $("kpi-unpriced").textContent = unpriced ? `${unpriced} call${unpriced === 1 ? "" : "s"} still unpriced` : "Successful model calls";
+      $("currency").textContent = (state.cost && state.cost.currency) || "USD";
+      $("id-patient").textContent = $("patient").value.trim() || "—";
+      $("hello-id").textContent = $("patient").value.trim() || "—";
+      $("id-prompt").textContent = compact(t.prompt_tokens);
+      $("id-completion").textContent = compact(t.completion_tokens);
+      const products = (state.cost && state.cost.by_product) || [];
+      const active = products.filter((p) => p.llm_calls > 0).map((p) => productName(p.product));
+      $("id-services").textContent = active.length ? active.join(", ") : "None yet";
+      const providers = (state.cost && state.cost.by_provider) || [];
+      $("id-providers").textContent = providers.length ? providers.map((p) => providerName(p.provider)).join(", ") : "None yet";
+      const latest = state.events[0];
+      $("kpi-last").textContent = latest ? when(latest.occurred_at) : "—";
+      $("kpi-last-hint").textContent = latest ? `${productName(latest.product)} · ${latest.model}` : "No calls yet";
+
+      const prompt = Number(t.prompt_tokens || 0);
+      const completion = Number(t.completion_tokens || 0);
+      const sum = prompt + completion || 1;
+      $("split").innerHTML = `<i style="width:${(prompt / sum) * 100}%"></i><i style="width:${(completion / sum) * 100}%"></i>`;
+      $("leg-in").textContent = `Prompt ${compact(prompt)}`;
+      $("leg-out").textContent = `Completion ${compact(completion)}`;
+    }
+
+    function paintMedals() {
+      const products = (state.cost && state.cost.by_product) || [];
+      const total = Number((state.cost && state.cost.totals && state.cost.totals.cost_usd) || 0);
+      const known = ["scan_ai", "patient_summary", "trial_match"];
+      $("medals").innerHTML = known.map((key) => {
+        const row = products.find((p) => p.product === key) || { llm_calls: 0, cost_usd: 0, total_tokens: 0 };
+        const share = total > 0 ? Math.max(4, (Number(row.cost_usd) / total) * 100) : 0;
+        const active = state.product === key ? "active" : "";
+        return `<button type="button" class="medal ${active}" data-product="${key}">
+          <div class="ring" style="--c:${PRODUCTS[key].color};--p:${row.llm_calls ? share : 0}"><span>${money(row.cost_usd)}</span></div>
+          <b>${PRODUCTS[key].label}</b>
+          <small>${compact(row.llm_calls)} calls · ${compact(row.total_tokens)} tokens</small>
+        </button>`;
+      }).join("");
+    }
+
+    function paintProviders() {
+      const rows = (state.cost && state.cost.by_provider) || [];
+      const max = Math.max(...rows.map((r) => Number(r.cost_usd) || 0), 0);
+      if (!rows.length) {
+        $("providers").innerHTML = `<div class="empty">No provider spend yet.</div>`;
+        return;
+      }
+      const colors = { openai: "#10a37f", anthropic: "#d97706", google: "#4285f4", groq: "#e11d48" };
+      $("providers").innerHTML = rows.map((r) => {
+        const width = max > 0 ? (Number(r.cost_usd) / max) * 100 : 0;
+        const active = state.provider === r.provider ? "active" : "";
+        return `<button type="button" class="bar-row ${active}" data-provider="${r.provider}">
+          <span>${providerName(r.provider)}</span>
+          <span class="track"><i style="width:${width}%;background:${colors[r.provider] || "#1b2b4b"}"></i></span>
+          <b>${money(r.cost_usd)}</b>
+        </button>`;
+      }).join("");
+    }
+
+    function paintFeatures(rows) {
+      const groups = new Map();
+      rows.forEach((e) => {
+        const key = `${e.product}::${e.feature || ""}`;
+        const g = groups.get(key) || { product: e.product, feature: e.feature || "", calls: 0, tokens: 0, cost: 0 };
+        g.calls += 1;
+        g.tokens += Number(e.total_tokens || 0);
+        g.cost += Number(e.cost_usd || 0);
+        groups.set(key, g);
+      });
+      const list = [...groups.values()].sort((a, b) => b.cost - a.cost);
+      if (!list.length) {
+        $("feature-box").innerHTML = "";
+        return;
+      }
+      $("feature-box").innerHTML = `<table class="features"><thead><tr><th>Feature</th><th>Calls</th><th>Tokens</th><th>Cost</th></tr></thead><tbody>${
+        list.map((g) => `<tr data-feature="${g.feature}" style="cursor:pointer;${state.feature === g.feature ? "background:#eef6ff" : ""}">
+          <td><span class="tag ${g.product}">${productName(g.product)}</span> ${featureName(g.feature)}</td>
+          <td>${compact(g.calls)}</td><td>${compact(g.tokens)}</td><td>${money(g.cost)}</td>
+        </tr>`).join("")
+      }</tbody></table>`;
+    }
+
+    function paintCalls() {
+      const rows = visibleEvents();
+      $("call-count").textContent = `${rows.length} call${rows.length === 1 ? "" : "s"}`;
+      paintFeatures(state.events.filter((e) => !state.product || e.product === state.product));
+      document.querySelectorAll("[data-product].chip").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.product === state.product);
+      });
+      if (!rows.length) {
+        $("call-body").innerHTML = `<tr><td colspan="6"><div class="empty">No calls match this view.</div></td></tr>`;
+        return;
+      }
+      $("call-body").innerHTML = rows.map((e) => `<tr data-id="${e.request_id}" class="${state.selected === e.request_id ? "selected" : ""}">
+        <td>${when(e.occurred_at)}</td>
+        <td><span class="tag ${e.product}">${productName(e.product)}</span></td>
+        <td>${featureName(e.feature)}</td>
+        <td>${e.model}</td>
+        <td>${compact(e.prompt_tokens)} / ${compact(e.completion_tokens)}</td>
+        <td class="${e.pricing_status === "priced" ? "" : "status-bad"}">${money(e.cost_usd)}</td>
+      </tr>`).join("");
+    }
+
+    function paintPrices() {
+      const rows = state.prices || [];
+      $("price-body").innerHTML = rows.length ? rows.map((p) => `<tr>
+        <td>${providerName(p.provider)}</td><td>${p.model}</td><td>$${Number(p.input_usd_per_1m).toFixed(2)}</td><td>$${Number(p.output_usd_per_1m).toFixed(2)}</td>
+      </tr>`).join("") : `<tr><td colspan="4"><div class="empty">Price catalog is unavailable.</div></td></tr>`;
+    }
+
+    function render() {
+      paintTotals();
+      paintMedals();
+      paintProviders();
+      paintCalls();
+      if (!$("catalog-page").classList.contains("hidden")) paintPrices();
+    }
+
+    function showPage(name) {
+      const catalog = name === "prices";
+      $("dashboard").classList.toggle("hidden", catalog);
+      $("catalog-page").classList.toggle("hidden", !catalog);
+      document.querySelectorAll(".nav button").forEach((b) => {
+        b.classList.toggle("active", b.dataset.go === name);
+      });
+      if (catalog) {
+        paintPrices();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+      const el = document.getElementById(name);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function openDrawer(id) {
+      const event = state.events.find((e) => e.request_id === id);
+      if (!event) return;
+      state.selected = id;
+      const price = matchPrice(event);
+      const inputRate = price ? Number(price.input_usd_per_1m) : 0;
+      const outputRate = price ? Number(price.output_usd_per_1m) : 0;
+      const formula = price
+        ? `(${event.prompt_tokens} / 1,000,000) × $${inputRate.toFixed(2)}  input\n+ (${event.completion_tokens} / 1,000,000) × $${outputRate.toFixed(2)}  output\n= ${money(event.cost_usd)}   catalog ${price.model}`
+        : "This model has no catalog price, so the stored cost is $0.";
+      $("drawer").innerHTML = `
+        <button class="icon-btn" type="button" id="close-drawer" aria-label="Close">×</button>
+        <div class="pill">${productName(event.product)}</div>
+        <h3>${featureName(event.feature)}</h3>
+        <div class="sub">${providerName(event.provider)} · ${event.model}</div>
+        <div class="money">${money(event.cost_usd)}</div>
+        <table class="kv">
+          <tr><th>When</th><td>${when(event.occurred_at)}</td></tr>
+          <tr><th>Prompt tokens</th><td>${compact(event.prompt_tokens)}</td></tr>
+          <tr><th>Completion tokens</th><td>${compact(event.completion_tokens)}</td></tr>
+          <tr><th>Total tokens</th><td>${compact(event.total_tokens)}</td></tr>
+          <tr><th>Pricing</th><td class="${event.pricing_status === "priced" ? "status-ok" : "status-bad"}">${event.pricing_status}</td></tr>
+          <tr><th>Source</th><td>${event.source_service || "—"}</td></tr>
+          <tr><th>Request</th><td style="word-break:break-all">${event.request_id}</td></tr>
+        </table>
+        <div class="formula">${formula}</div>`;
+      $("drawer").classList.remove("hidden");
+      $("drawer-back").classList.remove("hidden");
+      paintCalls();
+    }
+
+    function closeDrawer() {
+      state.selected = null;
+      $("drawer").classList.add("hidden");
+      $("drawer-back").classList.add("hidden");
+      paintCalls();
+    }
+
+    async function load() {
+      const patient = $("patient").value.trim();
+      if (!patient) return;
+      $("status").className = "note";
+      $("status").textContent = "Loading this patient's calls…";
+      const [costRes, eventRes, priceRes] = await Promise.all([
+        fetch("/api/cost?patient_id=" + encodeURIComponent(patient)),
+        fetch("/api/events?patient_id=" + encodeURIComponent(patient) + "&limit=500"),
+        fetch("/api/prices"),
+      ]);
+      const cost = await costRes.json();
+      const events = await eventRes.json();
+      const prices = await priceRes.json();
+      if (!costRes.ok) throw new Error(cost.detail || "Cost API failed");
+      if (!eventRes.ok) throw new Error(events.detail || "Event API failed");
+      state.cost = cost;
+      state.events = events.events || [];
+      state.prices = priceRes.ok ? prices : [];
+      $("status").textContent = "";
+      render();
+    }
+
+    async function refresh() {
+      try { await load(); }
+      catch (err) {
+        $("status").className = "note err";
+        $("status").textContent = err.message || String(err);
+      }
+    }
+
+    function setProduct(product) {
+      state.product = state.product === product ? "" : product;
+      state.feature = "";
+      render();
+      document.getElementById("calls").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    document.body.addEventListener("click", (ev) => {
+      const go = ev.target.closest("[data-go]");
+      if (go) showPage(go.dataset.go);
+      const medal = ev.target.closest(".medal");
+      if (medal) setProduct(medal.dataset.product);
+      const chip = ev.target.closest(".chip");
+      if (chip) setProduct(chip.dataset.product);
+      const provider = ev.target.closest("[data-provider]");
+      if (provider) {
+        state.provider = state.provider === provider.dataset.provider ? "" : provider.dataset.provider;
+        render();
+      }
+      const featureRow = ev.target.closest("[data-feature]");
+      if (featureRow && featureRow.closest("#feature-box")) {
+        state.feature = state.feature === featureRow.dataset.feature ? "" : featureRow.dataset.feature;
+        render();
+      }
+      const sort = ev.target.closest("[data-sort]");
+      if (sort) {
+        const key = sort.dataset.sort;
+        state.dir = state.sort === key && state.dir === "desc" ? "asc" : "desc";
+        state.sort = key;
+        paintCalls();
+      }
+      const row = ev.target.closest("#call-body tr[data-id]");
+      if (row) openDrawer(row.dataset.id);
+      if (ev.target.id === "close-drawer" || ev.target.id === "drawer-back") closeDrawer();
+    });
+
+    $("q").addEventListener("input", () => { state.q = $("q").value; paintCalls(); });
+    $("refresh").addEventListener("click", refresh);
+    $("patient").addEventListener("keydown", (ev) => { if (ev.key === "Enter") refresh(); });
+    document.addEventListener("keydown", (ev) => { if (ev.key === "Escape") closeDrawer(); });
+    refresh();
+  </script>
+</body>
+</html>
