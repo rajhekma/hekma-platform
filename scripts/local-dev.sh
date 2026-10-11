@@ -54,6 +54,7 @@ case "$cmd" in
     echo "  AI Usage:   http://localhost:${COMMERCE_PORT:-8090}/health"
     echo "  Patient:    http://localhost:${PATIENT_HEALTH_PORT:-8010}/health"
     echo "  Scanner:    http://localhost:${SCANNER_PORT:-8011}/health"
+    echo "  API docs:   http://localhost:${PLATFORM_DOCS_PORT:-8099}/docs"
     echo "  Postgres:   localhost:${POSTGRES_PORT:-5433}"
     echo "  MySQL:      localhost:${MYSQL_PORT:-3307}"
     echo "  Redis:      localhost:${REDIS_PORT:-6379}"

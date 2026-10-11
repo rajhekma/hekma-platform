@@ -18,7 +18,7 @@ from ..fasten_health.webhook_verification import (
 )
 
 logger = logging.getLogger("fasten_ehr")
-router = APIRouter()
+router = APIRouter(tags=["Fasten EHR"])
 
 
 @router.post("/fastenhealth/callback")

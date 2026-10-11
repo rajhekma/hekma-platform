@@ -31,8 +31,8 @@ def _period(from_: Optional[datetime], to: Optional[datetime]) -> tuple[datetime
 def register_public(app: FastAPI, deps: AppDeps) -> None:
     """Routes the gateway may publish."""
 
-    @app.get("/health", response_model=HealthResponse)
-    @app.get("/v1/ai-cost/health", response_model=HealthResponse)
+    @app.get("/health", response_model=HealthResponse, tags=["ops"])
+    @app.get("/v1/ai-cost/health", response_model=HealthResponse, tags=["ops"])
     def health(
         store: UsageRepository = Depends(deps.current_repo),
         cfg=Depends(deps.current_settings),
@@ -51,6 +51,7 @@ def register_public(app: FastAPI, deps: AppDeps) -> None:
     @app.get(
         "/v1/patients/{patient_id}/ai-cost",
         response_model=PatientCostResponse,
+        tags=["AI Cost"],
         dependencies=[Depends(require_key(deps))],
     )
     def patient_cost(
@@ -75,6 +76,7 @@ def register_public(app: FastAPI, deps: AppDeps) -> None:
     @app.get(
         "/v1/patients/{patient_id}/ai-cost/events",
         response_model=EventListResponse,
+        tags=["AI Cost"],
         dependencies=[Depends(require_key(deps))],
     )
     def patient_events(
@@ -103,6 +105,7 @@ def register_public(app: FastAPI, deps: AppDeps) -> None:
     @app.get(
         "/v1/ai-cost/prices",
         response_model=list[PriceRow],
+        tags=["AI Cost"],
         dependencies=[Depends(require_key(deps))],
     )
     def list_prices(store: UsageRepository = Depends(deps.current_repo)):

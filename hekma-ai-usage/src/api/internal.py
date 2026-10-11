@@ -13,6 +13,7 @@ def register_internal(app: FastAPI, deps: AppDeps) -> None:
     @app.post(
         "/internal/v1/ai-usage/events",
         response_model=IngestResult,
+        tags=["Ingest"],
         dependencies=[Depends(require_key(deps))],
     )
     def ingest_event(body: UsageEventIn, ingest: IngestService = Depends(deps.current_ingest)):
@@ -20,6 +21,7 @@ def register_internal(app: FastAPI, deps: AppDeps) -> None:
 
     @app.post(
         "/internal/v1/ai-usage/events:batch",
+        tags=["Ingest"],
         dependencies=[Depends(require_key(deps))],
     )
     def ingest_batch(body: list[UsageEventIn], ingest: IngestService = Depends(deps.current_ingest)):

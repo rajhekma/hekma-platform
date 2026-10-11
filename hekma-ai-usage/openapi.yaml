@@ -5,6 +5,8 @@ info:
 paths:
   /v1/ai-cost/health:
     get:
+      tags:
+      - ops
       summary: Health
       operationId: health_v1_ai_cost_health_get
       responses:
@@ -16,6 +18,8 @@ paths:
                 $ref: '#/components/schemas/HealthResponse'
   /health:
     get:
+      tags:
+      - ops
       summary: Health
       operationId: health_health_get
       responses:
@@ -27,6 +31,8 @@ paths:
                 $ref: '#/components/schemas/HealthResponse'
   /v1/patients/{patient_id}/ai-cost:
     get:
+      tags:
+      - AI Cost
       summary: Patient Cost
       operationId: patient_cost_v1_patients__patient_id__ai_cost_get
       parameters:
@@ -93,6 +99,8 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
   /v1/patients/{patient_id}/ai-cost/events:
     get:
+      tags:
+      - AI Cost
       summary: Patient Events
       operationId: patient_events_v1_patients__patient_id__ai_cost_events_get
       parameters:
@@ -176,6 +184,8 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
   /v1/ai-cost/prices:
     get:
+      tags:
+      - AI Cost
       summary: List Prices
       operationId: list_prices_v1_ai_cost_prices_get
       parameters:
@@ -205,6 +215,8 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
   /internal/v1/ai-usage/events:
     post:
+      tags:
+      - Ingest
       summary: Ingest Event
       operationId: ingest_event_internal_v1_ai_usage_events_post
       parameters:
@@ -237,6 +249,8 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
   /internal/v1/ai-usage/events:batch:
     post:
+      tags:
+      - Ingest
       summary: Ingest Batch
       operationId: ingest_batch_internal_v1_ai_usage_events_batch_post
       parameters:

@@ -5,7 +5,7 @@ from ..ehr_apis.get_patients.lambda_main import get_details as get_patients_deta
 from ..ehr_apis.get_headers.lambda_main import resource_type_handler as patient_header_handler
 from ..ehr_apis.get_resource_type_detail.lambda_main import resource_type_handler as patient_detail_handler
 
-router = APIRouter()
+router = APIRouter(tags=["Patient Profile"])
 
 
 @router.get("/patientheader")

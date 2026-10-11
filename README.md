@@ -12,6 +12,7 @@ cp .env.example .env
 | Service | URL / port |
 |---------|------------|
 | API Gateway (nginx) | http://localhost:9080 |
+| **Platform Swagger** | **http://localhost:8099/docs** |
 | AI Usage API | http://localhost:8090 |
 | Patient Health | http://localhost:8010 |
 | Scanner (Clinical AI) | http://localhost:8011 |
