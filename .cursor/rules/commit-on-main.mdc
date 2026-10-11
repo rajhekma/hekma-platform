@@ -1,0 +1,14 @@
+---
+description: Always commit and push on main. Never create a branch or PR unless asked.
+alwaysApply: true
+---
+
+# Git: main only
+
+- Stay on `main`. Do not create a feature branch, worktree, or PR unless the user names one.
+- When asked to commit, commit on `main`. Do not branch first.
+- When asked to push, push `main` to **both** remotes so GitHub matches local:
+  - `hekma` = `HekmaAI/hekma-platform` (org repo the team looks at)
+  - `origin` = `rajhekma/hekma-platform` (personal fork)
+- If only one remote is requested, use `hekma` (org), not `origin` alone.
+- Never force-push `main`.

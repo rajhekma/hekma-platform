@@ -13,6 +13,7 @@ The Python monolith (`hekma_data_pipeline`) is unchanged. Domain code was copied
 | Clinical FHIR store | `apis/clinical_fhir_api.py`, `services/clinical_fhir/` |
 | Medication (full) | `apis/medications_api.py`, `services/medications/` |
 | Account & compliance | `apis/account_deletion_api.py`, `services/account_deletion/` |
+| HealthKit | `apis/healthkit_api.py`, `healthkit_apis/` |
 
 Not in this service: clinical scanner, EHR summary (Clinical AI), chat, CTMS.
 

@@ -1,6 +1,6 @@
 """Hekma Patient Health — S3.
 
-Owns patient profile, EHR ingest, FHIR store, medications, and account deletion.
+Owns patient profile, EHR ingest, FHIR store, medications, HealthKit, and account deletion.
 Identity still issues tokens; this service only validates them and checks ownership.
 """
 
@@ -17,6 +17,7 @@ from fastapi.responses import JSONResponse
 from .apis.account_deletion_api import router as account_deletion_router
 from .apis.clinical_fhir_api import router as clinical_fhir_router
 from .apis.fasten_api import router as fasten_router
+from .apis.healthkit_api import router as healthkit_router
 from .apis.medications_api import router as medications_router
 from .apis.patient_api import router as patient_router
 from .settings import get_settings
@@ -45,7 +46,7 @@ def create_app() -> FastAPI:
         version="1.0.0",
         description=(
             "Patient profile, EHR integration, FHIR store, medications, "
-            "and account deletion."
+            "HealthKit, and account deletion."
         ),
         lifespan=lifespan,
     )
@@ -75,6 +76,7 @@ def create_app() -> FastAPI:
     app.include_router(fasten_router)
     app.include_router(clinical_fhir_router)
     app.include_router(medications_router)
+    app.include_router(healthkit_router)
     app.include_router(account_deletion_router)
     return app
 

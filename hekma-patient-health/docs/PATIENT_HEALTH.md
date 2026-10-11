@@ -3,7 +3,8 @@
 **Service:** `hekma-patient-health` · **Port:** 8010 · **Role:** S3 in the platform
 
 This is the patient-facing clinical record. One deployable owns the person's
-profile, their connected EHR, the FHIR store, medications, and account deletion.
+profile, their connected EHR, the FHIR store, medications, HealthKit, and
+account deletion.
 
 It is **not** CTMS, **not** Clinical AI (scanner / summaries), and **not**
 Identity. Those services call this one when they need patient health data.
@@ -21,6 +22,7 @@ The Python monolith was left as-is. Domain code was copied here.
 | **3 · Clinical FHIR Store** | Allergies, labs, vitals, conditions | Unified `fastenhealth_*` tables |
 | **4 · Medication** | Meds list, today, doses, Rx scan, reminders | Prescriptions, schedules, adherence |
 | **5 · Account & Compliance** | Delete my account | OTP, archive, delayed PHI purge |
+| **6 · HealthKit** | Wearable / vitals sync | `healthkit` snapshots |
 
 ---
 
@@ -38,7 +40,8 @@ flowchart TB
         F[Clinical FHIR Store]
         M[Medication]
         A[Account & Compliance]
-        AUTH --> P & E & F & M & A
+        K[HealthKit]
+        AUTH --> P & E & F & M & A & K
         E -->|writes FHIR| F
         F -->|tiles| P
         M -->|optional dual-write| F
@@ -52,7 +55,9 @@ flowchart TB
     F --> PG[(Postgres · fastenhealth_*)]
     M --> PG
     A --> PG
+    K --> PG
     P --> REDIS[(Redis · chart cache)]
+    K --> REDIS
 ```
 
 **Rule:** Identity issues the token. This service only validates it and checks
@@ -227,6 +232,29 @@ did ownership correctly in the monolith.
 
 ---
 
+## 6 · HealthKit
+
+Wearable / vitals snapshots from the mobile HealthKit sync. Same
+`GET/POST /healthkit` contract as the Python app. Copied here; the monolith
+is unchanged.
+
+```mermaid
+flowchart LR
+    APP[Mobile sync] --> API["GET/POST /healthkit"]
+    API --> OWN[JWT + ownership on id]
+    OWN --> PG[(healthkit · payload JSONB)]
+    OWN --> REDIS[(list cache)]
+```
+
+| API | Purpose |
+|-----|---------|
+| `POST /healthkit` | Upsert one snapshot (`id` + `timestamp` required) |
+| `GET /healthkit` | List snapshots for `id`, optional time range + page |
+
+`id` is the patient id. Mismatch is **404**. Staff may read another patient.
+
+---
+
 ## Where it sits on the platform
 
 ```mermaid
@@ -243,7 +271,7 @@ flowchart LR
 | This service does | Another service does |
 |-------------------|----------------------|
 | Patient's health record | Identity: login / RBAC |
-| Fasten + FHIR + meds | Clinical AI: document scan, EHR summary |
+| Fasten + FHIR + meds + HealthKit | Clinical AI: document scan, EHR summary |
 | Account deletion | CTMS: studies, sites, support tickets |
 | | Commerce: plans and entitlements |
 
@@ -253,7 +281,7 @@ flowchart LR
 
 | Store | Used for |
 |-------|----------|
-| PostgreSQL | FHIR resources, medications, prescriptions, deletion archive |
+| PostgreSQL | FHIR resources, medications, prescriptions, HealthKit, deletion archive |
 | MySQL | `Patient` lookup until CTMS stops sharing that table |
 | Redis | Chart cache + JWT blacklist check |
 
@@ -271,6 +299,6 @@ python -m pytest
 uvicorn hekma_patient_health.main:app --app-dir src --port 8010
 ```
 
-Gateway routes `/patient*`, `/fastenhealth`, `/api/patients/`, `/api/account/`,
-and `/api/internal/clinical-fhir/` here. Clinical scan and EHR summary live in
-`hekma-scanner`. HealthKit stays on the Python monolith.
+Gateway routes `/patient*`, `/fastenhealth`, `/healthkit`, `/api/patients/`,
+`/api/account/`, and `/api/internal/clinical-fhir/` here. Clinical scan and
+EHR summary live in `hekma-scanner`.

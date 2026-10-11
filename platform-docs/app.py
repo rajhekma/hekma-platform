@@ -19,7 +19,7 @@ EXTRACTED = [
         "name": "Patient Health",
         "port": int(os.getenv("PATIENT_HEALTH_PORT", "8010")),
         "origin": os.getenv("PATIENT_HEALTH_URL", "http://127.0.0.1:8010").rstrip("/"),
-        "summary": "Profile, Fasten EHR, FHIR write, medications, account deletion.",
+        "summary": "Profile, Fasten EHR, FHIR, medications, HealthKit, account deletion.",
     },
     {
         "id": "scanner",
@@ -67,13 +67,6 @@ NOT_EXTRACTED = [
         "host": "PHI-PII",
         "summary": "De-identification. Called when PRIVACY_SERVICE_ENABLED is set.",
         "routes": ["PRIVACY_SERVICE_URL"],
-    },
-    {
-        "code": "—",
-        "name": "HealthKit",
-        "host": "hekma_data_pipeline :8000",
-        "summary": "Wearable ingest. Still on the Python app.",
-        "routes": ["/healthkit", "leftover /api/*"],
     },
 ]
 

@@ -11,7 +11,7 @@ The Python monolith (`hekma_data_pipeline`) is unchanged. Domain code was copied
 | Clinical Scanner | `apis/clinical_scans_api.py`, `services/clinical_scans/` |
 | EHR Summary | `apis/ehr_summary_api.py`, `fasten_health/ehr_summary_*` |
 
-Not in this service: patient profile, Fasten connect, medication APIs, chat, CTMS, HealthKit.
+Not in this service: patient profile, Fasten connect, medication APIs, HealthKit, chat, CTMS.
 
 ## Run
 

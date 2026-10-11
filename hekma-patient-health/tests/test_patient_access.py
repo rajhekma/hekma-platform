@@ -89,6 +89,23 @@ def test_widget_complete_requires_auth():
     assert response.status_code == 401
 
 
+def test_healthkit_requires_auth():
+    client = TestClient(create_app())
+    assert client.get("/healthkit", params={"id": "111"}).status_code == 401
+    assert client.post("/healthkit", json={"id": "111", "timestamp": "2026-10-11T00:00:00"}).status_code == 401
+
+
+def test_healthkit_rejects_cross_patient_token():
+    client = TestClient(create_app())
+    token = _token("111")
+    response = client.get(
+        "/healthkit",
+        params={"id": "222"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 404
+
+
 def test_ctms_repo_does_not_import_monolith():
     import hekma_patient_health.repositories.ctms_clinical_repo as repo
 
