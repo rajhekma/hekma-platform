@@ -27,16 +27,16 @@ Point existing monoliths at these hosts while you extract microservices:
 
 ```
 hekma-platform/
-├── ai-usage/             # patient AI usage: backend API + local dashboard
-│   ├── backend/          # ingest, pricing, query API, emitter library
-│   └── frontend/         # monitoring dashboard (local only)
+├── hekma-ai-usage/       # one service: src/api, src/service, src/repository
 ├── api-gateway/          # nginx routes (monolith → new services)
 ├── docker-compose.yml    # local Postgres, MySQL, Redis, LocalStack, gateway, AI usage
 ├── docs/                 # architecture & setup guides
 ├── event-schemas/        # async event contracts (SQS)
 ├── scripts/              # local-dev helpers
-└── shared/               # cross-service libraries (auth, later)
+└── shared/               # libraries copied by services (hekma_ai_usage emitter)
 ```
+
+Each business service is a `hekma-{service-name}/` folder with `Dockerfile`, `src/main.py`, `src/api/`, `src/service/`, `src/repository/`, `migrations/`, `tests/`, and `openapi.yaml`.
 
 ## Docs
 
@@ -50,9 +50,9 @@ hekma-platform/
 - **[docs/TENANCY_DESIGN.md](docs/TENANCY_DESIGN.md)** — multi-org work, when you need it
 - **[docs/MONETIZATION_ROADMAP.md](docs/MONETIZATION_ROADMAP.md)** — subscriptions, metering, tenancy: roadmap for leadership
 - [docs/TENANCY_LEADERSHIP_OVERVIEW.md](docs/TENANCY_LEADERSHIP_OVERVIEW.md) — business-level, for leadership
-- [ai-usage/docs/AI_USAGE_OVERVIEW.md](ai-usage/docs/AI_USAGE_OVERVIEW.md) — why AI Usage exists and the architecture choices
-- [ai-usage/docs/AI_USAGE_HLD.md](ai-usage/docs/AI_USAGE_HLD.md) — developer design: components, APIs, pricing, how to emit
-- [ai-usage/docs/AI_COST_ANALYTICS.md](ai-usage/docs/AI_COST_ANALYTICS.md) — short API reference for the same service
+- [hekma-ai-usage/docs/AI_USAGE_OVERVIEW.md](hekma-ai-usage/docs/AI_USAGE_OVERVIEW.md) — why AI Usage exists and the architecture choices
+- [hekma-ai-usage/docs/AI_USAGE_HLD.md](hekma-ai-usage/docs/AI_USAGE_HLD.md) — developer design: components, APIs, pricing, how to emit
+- [hekma-ai-usage/docs/AI_COST_ANALYTICS.md](hekma-ai-usage/docs/AI_COST_ANALYTICS.md) — short API reference for the same service
 - [GitHub setup](docs/GITHUB_SETUP.md)
 - `docs/archive/` — rejected plans, reference only
 

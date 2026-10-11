@@ -13,8 +13,8 @@ cmd="${1:-up}"
 
 run_ai_usage_nodocker() {
   local port="${COMMERCE_PORT:-8090}"
-  local db_path="${ROOT}/ai-usage/backend/data/commerce.db"
-  mkdir -p "${ROOT}/ai-usage/backend/data"
+  local db_path="${ROOT}/hekma-ai-usage/data/commerce.db"
+  mkdir -p "${ROOT}/hekma-ai-usage/data"
 
   echo "Docker is not installed on this machine."
   echo "Starting the AI Usage API in no-Docker mode (SQLite at ${db_path})."
@@ -28,18 +28,18 @@ run_ai_usage_nodocker() {
     exit 0
   fi
 
-  python3 -m pip install -q -r "${ROOT}/ai-usage/backend/requirements.txt"
+  python3 -m pip install -q -r "${ROOT}/hekma-ai-usage/requirements.txt"
 
   export DATABASE_URL="sqlite:///${db_path}"
   export AI_USAGE_SQS_ENABLED=false
-  export PYTHONPATH="${ROOT}/ai-usage/backend${PYTHONPATH:+:$PYTHONPATH}"
+  export PYTHONPATH="${ROOT}/hekma-ai-usage/src:${ROOT}/shared${PYTHONPATH:+:$PYTHONPATH}"
 
   echo "AI Usage API: http://127.0.0.1:${port}/health"
   echo "Example:      curl http://127.0.0.1:${port}/v1/patients/203664/ai-cost"
-  echo "Dashboard:    cd ai-usage/frontend && python3 server.py"
+  echo "Dashboard:    cd hekma-ai-usage/frontend && python3 server.py"
   echo "Stop with Ctrl+C"
   echo ""
-  exec python3 -m uvicorn app.main:app --app-dir "${ROOT}/ai-usage/backend" --host 127.0.0.1 --port "${port}"
+  exec python3 -m uvicorn main:app --app-dir "${ROOT}/hekma-ai-usage/src" --host 127.0.0.1 --port "${port}"
 }
 
 case "$cmd" in
@@ -84,7 +84,7 @@ case "$cmd" in
     ;;
   reset)
     if ! command -v docker >/dev/null 2>&1; then
-      rm -f "${ROOT}/ai-usage/backend/data/commerce.db"
+      rm -f "${ROOT}/hekma-ai-usage/data/commerce.db"
       echo "Removed local SQLite database."
       exit 0
     fi

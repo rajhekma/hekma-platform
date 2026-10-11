@@ -64,7 +64,7 @@ services:
       - hekma_localstack_data:/var/lib/localstack
 
   ai-usage:
-    build: ./ai-usage/backend
+    build: ./hekma-ai-usage
     container_name: hekma-platform-ai-usage
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-hekma}:${POSTGRES_PASSWORD:-hekma_local_dev}@postgres:5432/${POSTGRES_DB:-hekma_platform}
