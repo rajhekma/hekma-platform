@@ -155,3 +155,31 @@ def test_health():
     resp = client.get("/health")
     assert resp.status_code == 200
     assert resp.json()["status"] == "ok"
+
+
+def test_production_requires_api_key():
+    repo = InMemoryUsageRepository(PRICES)
+    app = create_app(
+        repo=repo,
+        settings=Settings(
+            ai_cost_api_key=None,
+            hekma_env="production",
+            ai_usage_sqs_enabled=False,
+        ),
+        start_sqs=False,
+    )
+    client = TestClient(app)
+    assert client.get("/v1/patients/203664/ai-cost").status_code == 503
+
+
+def test_wrong_api_key_is_rejected():
+    repo = InMemoryUsageRepository(PRICES)
+    app = create_app(
+        repo=repo,
+        settings=Settings(ai_cost_api_key="correct", ai_usage_sqs_enabled=False),
+        start_sqs=False,
+    )
+    client = TestClient(app)
+    assert client.get("/v1/patients/203664/ai-cost").status_code == 401
+    ok = client.get("/v1/patients/203664/ai-cost", headers={"X-API-Key": "correct"})
+    assert ok.status_code == 200

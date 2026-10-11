@@ -27,9 +27,16 @@ def verify_fasten_webhook(raw_body: bytes, headers: dict) -> None:
     Skips verification when the secret is unset (local/dev without portal config).
     """
     secret = os.getenv("FASTEN_WEBHOOK_SECRET", "").strip()
+    env = os.getenv("HEKMA_ENV", "local").strip().lower()
     if not secret:
-        logger.debug("FASTEN_WEBHOOK_SECRET not set — skipping webhook signature verification")
-        return
+        if env == "local":
+            logger.warning(
+                "FASTEN_WEBHOOK_SECRET not set — skipping verify only because HEKMA_ENV=local"
+            )
+            return
+        raise FastenWebhookVerificationError(
+            "FASTEN_WEBHOOK_SECRET is required outside local development."
+        )
 
     if Webhook is None:
         raise FastenWebhookVerificationError(

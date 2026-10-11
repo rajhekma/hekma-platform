@@ -110,6 +110,12 @@ def _validate_file_size(file_bytes: bytes) -> None:
 
 
 def _download_bytes(url: str):
+    from ...utils.url_safety import UnsafeDownloadUrlError, assert_safe_download_url
+
+    try:
+        assert_safe_download_url(url)
+    except UnsafeDownloadUrlError as exc:
+        raise InvalidClinicalDocumentError(str(exc)) from exc
     try:
         resp = requests.get(url, timeout=30)
         resp.raise_for_status()

@@ -9,6 +9,7 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql://hekma:hekma_local_dev@localhost:5433/hekma_platform"
     ai_cost_api_key: Optional[str] = None
+    hekma_env: str = "local"
     default_tenant_id: int = 1
     aws_region: str = "us-east-1"
     aws_endpoint_url: Optional[str] = None

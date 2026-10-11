@@ -60,3 +60,21 @@ def require_patient_access(
 ) -> dict:
     """FastAPI dependency. Bind `patient_id` from the path."""
     return assert_patient_access(user, patient_id)
+
+
+def assert_staff(user: Optional[dict]) -> dict:
+    if not user:
+        raise HTTPException(
+            status_code=401,
+            detail={"code": "UNAUTHENTICATED", "message": "Sign in required."},
+        )
+    if _role(user) not in STAFF_ROLES:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "NOT_FOUND", "message": "Not found."},
+        )
+    return user
+
+
+def require_staff(user: Any = Depends(jwt_filter)) -> dict:
+    return assert_staff(user)

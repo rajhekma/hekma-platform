@@ -131,6 +131,9 @@ class PrescriptionService:
         if source_url:
             import urllib.request
 
+            from ...utils.url_safety import assert_safe_download_url
+
+            assert_safe_download_url(source_url)
             content_hash = self._compute_hash(urllib.request.urlopen(source_url).read())
             orphan = self._resolve_duplicate_or_orphan(patient_id, content_hash)
             payload["contentHash"] = content_hash

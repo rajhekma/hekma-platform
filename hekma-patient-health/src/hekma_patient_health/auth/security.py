@@ -132,8 +132,16 @@ def cache_reprocess_auth(
             status_code=401,
             detail=(
                 "Invalid or missing cache reprocess credentials. "
-                "Provide X-Hekma-Cache-Key header or apiKey query param matching CACHE_REPROCESS_API_KEY."
+                "Provide X-Hekma-Cache-Key header matching CACHE_REPROCESS_API_KEY."
             ),
         )
 
-    return authenticate_authorization_header(authorization)
+    env = os.getenv("HEKMA_ENV", "local").strip().lower()
+    if env != "local":
+        raise HTTPException(
+            status_code=503,
+            detail="CACHE_REPROCESS_API_KEY is required.",
+        )
+    from .patient_access import assert_staff
+
+    return assert_staff(authenticate_authorization_header(authorization))

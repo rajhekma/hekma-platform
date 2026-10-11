@@ -7,7 +7,7 @@ from ..awsutils.mysql_db_connection import mysql_connection
 from ..services.clinical_fhir.mappers import allergy_fhir_criticality, normalize_allergy_severity
 
 
-from hekma_data_pipleline.services.clinical_scans.exceptions import RecordAlreadyExistsError
+from ..services.clinical_scans.exceptions import RecordAlreadyExistsError
 
 
 class DuplicateClinicalRecordError(RecordAlreadyExistsError):

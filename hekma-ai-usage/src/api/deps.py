@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hmac
 from typing import Optional
 
 from fastapi import Depends, FastAPI, Header, HTTPException
@@ -28,7 +29,17 @@ def require_key(deps: AppDeps):
         x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"),
         cfg: Settings = Depends(deps.current_settings),
     ) -> None:
-        if cfg.ai_cost_api_key and x_api_key != cfg.ai_cost_api_key:
+        expected = (cfg.ai_cost_api_key or "").strip()
+        env = (cfg.hekma_env or "local").strip().lower()
+        if not expected:
+            if env == "local":
+                return
+            raise HTTPException(
+                status_code=503,
+                detail="AI_COST_API_KEY is required outside local development.",
+            )
+        provided = (x_api_key or "").strip()
+        if not provided or not hmac.compare_digest(provided, expected):
             raise HTTPException(status_code=401, detail="Invalid or missing API key")
 
     return _require_key

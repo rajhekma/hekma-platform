@@ -247,6 +247,9 @@ class OpenAIClinicalVisionExtractor:
         return extracted
 
     def extract_from_url(self, source_url: str, profile: Dict[str, Any]) -> Dict[str, Any]:
+        from ...utils.url_safety import assert_safe_download_url
+
+        assert_safe_download_url(source_url)
         response = requests.get(source_url, timeout=30)
         response.raise_for_status()
         mime_type = guess_mime_type_from_url(source_url, response.headers.get("Content-Type"))

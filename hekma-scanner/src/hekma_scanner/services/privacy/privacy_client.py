@@ -24,12 +24,14 @@ class PrivacyServiceClient:
         api_key: Optional[str] = None,
         enabled: Optional[bool] = None,
     ):
-        self.base_url = (base_url or os.getenv("PRIVACY_SERVICE_URL", "https://dev-pdsapi.hekma.ai")).rstrip("/")
+        self.base_url = (base_url or os.getenv("PRIVACY_SERVICE_URL", "")).rstrip("/")
         self.timeout = timeout or float(os.getenv("PRIVACY_SERVICE_TIMEOUT_SECONDS", "15.0"))
-        self.api_key = api_key or os.getenv("PRIVACY_SERVICE_API_KEY", "hekma_sec_live_9a7b8c6d")
-        
-        env_enabled = os.getenv("PRIVACY_SERVICE_ENABLED", "true").lower() in ("true", "1", "yes")
-        self.enabled = enabled if enabled is not None else env_enabled
+        self.api_key = api_key or os.getenv("PRIVACY_SERVICE_API_KEY", "")
+
+        env_enabled = os.getenv("PRIVACY_SERVICE_ENABLED", "false").lower() in ("true", "1", "yes")
+        self.enabled = bool(
+            (enabled if enabled is not None else env_enabled) and self.base_url
+        )
 
         # Set up persistent HTTP connection pooling with retries
         self.session = requests.Session()

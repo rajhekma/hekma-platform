@@ -59,3 +59,37 @@ def test_health_is_public():
 def test_medications_require_auth():
     client = TestClient(create_app())
     assert client.get("/api/patients/111/medications").status_code == 401
+
+
+def test_fasten_initiate_requires_auth():
+    client = TestClient(create_app())
+    assert (
+        client.post("/fastenhealth/initiate", json={"orgConnectionId": "x"}).status_code
+        == 401
+    )
+
+
+def test_fasten_revoke_is_staff_only():
+    client = TestClient(create_app())
+    token = _token("111")
+    response = client.post(
+        "/fastenhealth/vault/revoke",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"email": "a@b.com"},
+    )
+    assert response.status_code == 404
+
+
+def test_widget_complete_requires_auth():
+    client = TestClient(create_app())
+    response = client.post(
+        "/fastenhealth/callback",
+        json={"type": "widget.complete", "patientId": "111", "data": []},
+    )
+    assert response.status_code == 401
+
+
+def test_ctms_repo_does_not_import_monolith():
+    import hekma_patient_health.repositories.ctms_clinical_repo as repo
+
+    assert not repo.__file__.endswith("hekma_data_pipleline")
