@@ -52,6 +52,8 @@ case "$cmd" in
     echo "Platform stack is up."
     echo "  Gateway:    http://localhost:${GATEWAY_PORT:-9080}/health"
     echo "  AI Usage:   http://localhost:${COMMERCE_PORT:-8090}/health"
+    echo "  Patient:    http://localhost:${PATIENT_HEALTH_PORT:-8010}/health"
+    echo "  Scanner:    http://localhost:${SCANNER_PORT:-8011}/health"
     echo "  Postgres:   localhost:${POSTGRES_PORT:-5433}"
     echo "  MySQL:      localhost:${MYSQL_PORT:-3307}"
     echo "  Redis:      localhost:${REDIS_PORT:-6379}"

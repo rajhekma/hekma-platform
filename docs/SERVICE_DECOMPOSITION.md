@@ -108,7 +108,7 @@ flowchart TB
 | **S1** | Identity & Access | `hekma_api` | Login, JWT, OTP, sessions, RBAC, token blacklist |
 | **S2** | CTMS | `hekma_api` | Studies, sites, sponsors, enrollment, schedules, AEs, support, files, webhooks, marketplace |
 | **S3** | Patient Health | `hekma_data_pipleline` | Patient identity, EHR ingest, FHIR store, summaries, medications, HealthKit |
-| **S4** | Document Intelligence | `hekma_data_pipleline` | Scanning, OCR, AI extraction |
+| **S4** | Document Intelligence | `hekma-scanner` | Scanning, OCR, AI extraction, EHR summary |
 | **S5** | Trial Matching | `TrialGPT` — exists | Patient↔trial matching, vectors |
 | **S6** | Privacy Shield | `PHI-PII` — exists | Anonymization, tokenization |
 

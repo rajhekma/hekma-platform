@@ -234,7 +234,7 @@ flowchart LR
     S1[1 Identity] -->|JWT| S3
     S2[2 CTMS] -->|project clinical rows| S3
     S3[3 Patient Health]
-    S4[4 Clinical AI] -.->|future: write scans into FHIR| S3
+    S4[4 Clinical AI] -.->|scan persist · same fastenhealth_*| S3
     S5[5 Trial Matching]
     S6[6 PHI Shield] -.-> S3
     S7[7 Commerce]
@@ -272,5 +272,5 @@ uvicorn hekma_patient_health.main:app --app-dir src --port 8010
 ```
 
 Gateway routes `/patient*`, `/fastenhealth`, `/api/patients/`, `/api/account/`,
-and `/api/internal/clinical-fhir/` here. Scanner and HealthKit stay on the
-Python monolith.
+and `/api/internal/clinical-fhir/` here. Clinical scan and EHR summary live in
+`hekma-scanner`. HealthKit stays on the Python monolith.

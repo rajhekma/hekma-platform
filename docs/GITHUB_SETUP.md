@@ -59,7 +59,7 @@ If you use Cursor repos instead of GitHub, follow the **new-repo** / **origin** 
 
 Create repos **when you extract** each service (not all on day 1):
 
-- `hekma-clinical-scanner` (MS-11 — next)
+- `hekma-scanner` (MS-11 + MS-13 — extracted in this repo)
 - `hekma-support-center` (MS-05)
 - `hekma-medication` (MS-12)
 - … see [MICROSERVICE_ARCHITECTURE.md](./MICROSERVICE_ARCHITECTURE.md)
