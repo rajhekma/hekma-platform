@@ -38,6 +38,8 @@ pytest
 
 Other services do not store cost. They copy `shared/hekma_ai_usage` and POST `ai.usage.recorded`. The query API is `GET /v1/patients/{id}/ai-cost`.
 
+**Design:** [docs/AI_USAGE.md](docs/AI_USAGE.md) — components, APIs, and diagrams.
+
 - [Overview](docs/AI_USAGE_OVERVIEW.md)
 - [High-level design](docs/AI_USAGE_HLD.md)
 - [API reference](docs/AI_COST_ANALYTICS.md)

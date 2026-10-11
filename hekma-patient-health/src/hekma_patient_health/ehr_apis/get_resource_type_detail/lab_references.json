@@ -1,0 +1,852 @@
+{
+  "lab_references": [
+    {
+      "testTitle": "Triglycerides",
+      "unit": "mg/dL",
+      "min": "",
+      "max": 250
+    },
+    {
+      "testTitle": "Triglycerides (fasting)",
+      "unit": "mg/dL",
+      "min": "",
+      "max": 250
+    },
+    {
+      "testTitle": "Triglycerides",
+      "unit": "mmol/L",
+      "min": "",
+      "max": 2.82
+    },
+    {
+      "testTitle": "Triglycerides (fasting)",
+      "unit": "mmol/L",
+      "min": "",
+      "max": 2.82
+    },
+    {
+      "testTitle": "Total Cholesterol",
+      "unit": "mg/dL",
+      "min": 150,
+      "max": 199
+    },
+    {
+      "testTitle": "Cholesterol Total",
+      "unit": "mg/dL",
+      "min": 150,
+      "max": 199
+    },
+    {
+      "testTitle": "Low Density Lipoprotein Cholesterol",
+      "unit": "mg/dL",
+      "min": "",
+      "max": 130
+    },
+    {
+      "testTitle": "High Density Lipoprotein Cholesterol",
+      "unit": "mg/dL",
+      "min": 40,
+      "max": ""
+    },
+    {
+      "testTitle": "HDL",
+      "unit": "mg/dL",
+      "min": 40,
+      "max": ""
+    },
+    {
+      "testTitle": "Chol/HDL",
+      "unit": "mg/dL",
+      "min": 40,
+      "max": ""
+    },
+    {
+      "testTitle": "LDL",
+      "unit": "mg/dL",
+      "min": "",
+      "max": 130
+    },
+    {
+      "testTitle": "Blood Pressure",
+      "unit": "mm[Hg]",
+      "min": 80,
+      "max": 120
+    },
+    {
+      "testTitle": "Hemoglobin [Mass/volume] in Blood",
+      "unit": "g/dL",
+      "gender": "Male",
+      "min": 14,
+      "max": 17
+    },
+    {
+      "testTitle": "Hemoglobin [Mass/volume] in Blood",
+      "unit": "g/L",
+      "gender": "Male",
+      "min": 140,
+      "max": 170
+    },
+    {
+      "testTitle": "Hemoglobin [Presence] in Urine by Test strip",
+      "min": "Negative",
+      "max": "Negative"
+    },
+    {
+      "testTitle": "Hgb",
+      "unit": "g/dL",
+      "gender": "Male",
+      "min": 14,
+      "max": 17
+    },
+    {
+      "testTitle": "Hgb",
+      "unit": "mg/dL",
+      "gender": "Male",
+      "min": 14000,
+      "max": 17000
+    },
+    {
+      "testTitle": "Erythrocyte distribution width [Entitic volume] by Automated count",
+      "unit": "fL",
+      "min": 11.8,
+      "max": 16.1
+    },
+    {
+      "testTitle": "Erythrocytes [#/volume] in Blood by Automated count",
+      "unit": "10*6/uL",
+      "min": 4.3,
+      "max": 5.9
+    },
+    {
+      "testTitle": "Glucose Level",
+      "unit": "mg/dL",
+      "min": 70,
+      "max": 99
+    },
+    {
+      "testTitle": "Glucose",
+      "unit": "mg/dL",
+      "min": 70,
+      "max": 99
+    },
+    {
+      "testTitle": "Glucose [Mass/volume] in Urine by Test strip",
+      "unit": "mg/dL",
+      "min": 0,
+      "max": 15
+    },
+    {
+      "testTitle": "Urea Nitrogen",
+      "unit": "mg/dL",
+      "min": 8,
+      "max": 20
+    },
+    {
+      "testTitle": "BUN",
+      "unit": "mg/dL",
+      "min": 8,
+      "max": 20
+    },
+    {
+      "testTitle": "Hemoglobin A1c/Hemoglobin.total in Blood",
+      "unit": "%",
+      "min": 4.7,
+      "max": 8.5
+    },
+    {
+      "testTitle": "HbA1c",
+      "unit": "%",
+      "min": 4.7,
+      "max": 8.5
+    },
+    {
+      "testTitle": "Hemoglobin A1c",
+      "unit": "%",
+      "min": 4.7,
+      "max": 8.5
+    },
+    {
+      "testTitle": "Estimated Glomerular Filtration Rate",
+      "unit": "mL/min/{1.73_m2}",
+      "min": 60,
+      "max": ""
+    },
+    {
+      "testTitle": "Glomerular filtration rate/1.73 sq M.predicted",
+      "unit": "mL/min",
+      "min": 60,
+      "max": ""
+    },
+    {
+      "testTitle": "Sodium",
+      "unit": "mmol/L",
+      "min": 136,
+      "max": 145
+    },
+    {
+      "testTitle": "Sodium Level",
+      "unit": "mmol/L",
+      "min": 136,
+      "max": 145
+    },
+    {
+      "testTitle": "Potassium",
+      "unit": "mmol/L",
+      "min": 3.5,
+      "max": 5
+    },
+    {
+      "testTitle": "Potassium Level",
+      "unit": "mmol/L",
+      "min": 3.5,
+      "max": 5
+    },
+    {
+      "testTitle": "Protein [Mass/volume] in Serum or Plasma",
+      "unit": "g/dL",
+      "min": 6,
+      "max": 8.3
+    },
+    {
+      "testTitle": "Protein [Mass/volume] in Urine by Test strip",
+      "unit": "mg/dL",
+      "min": 10,
+      "max": 140
+    },
+    {
+      "testTitle": "Protein [Presence] in Urine by Test strip",
+      "min": "Negative",
+      "max": "Negative"
+    },
+    {
+      "testTitle": "Protein Total",
+      "unit": "g/dL",
+      "min": 6,
+      "max": 8.3
+    },
+    {
+      "testTitle": "Protein Total",
+      "unit": "mg/dL",
+      "min": 6000,
+      "max": 8300
+    },
+    {
+      "testTitle": "Appearance of Urine",
+      "min": "Light yellow",
+      "max": "Deep amber"
+    },
+    {
+      "testTitle": "Color of Urine",
+      "min": "Light yellow",
+      "max": "Deep amber"
+    },
+    {
+      "testTitle": "Odor of Urine",
+      "min": "Odorless",
+      "max": "Odorless"
+    },
+    {
+      "testTitle": "pH of Urine by Test strip",
+      "unit": "",
+      "min": 4.5,
+      "max": 8
+    },
+    {
+      "testTitle": "pH",
+      "unit": "",
+      "min": 7.38,
+      "max": 7.44
+    },
+    {
+      "testTitle": "pH",
+      "unit": "mmol/L",
+      "min": 22,
+      "max": 26
+    },
+    {
+      "testTitle": "pH Art",
+      "unit": "",
+      "min": 7.38,
+      "max": 7.44
+    },
+    {
+      "testTitle": "Specific gravity of Urine by Test strip",
+      "unit": "{nominal}",
+      "min": 1.005,
+      "max": 1.03
+    },
+    {
+      "testTitle": "Clarity of Urine",
+      "min": "Clear",
+      "max": "Turbid"
+    },
+    {
+      "testTitle": "Ketones [Presence] in Urine by Test strip",
+      "min": "Negative",
+      "max": "Negative"
+    },
+    {
+      "testTitle": "Creatinine",
+      "unit": "mg/dL",
+      "min": 0.7,
+      "max": 1.3
+    },
+    {
+      "testTitle": "Creatinine Level",
+      "unit": "mg/dL",
+      "min": 0.7,
+      "max": 1.3
+    },
+    {
+      "testTitle": "Chloride",
+      "unit": "mmol/L",
+      "min": 98,
+      "max": 106
+    },
+    {
+      "testTitle": "Chloride Level",
+      "unit": "mmol/L",
+      "min": 98,
+      "max": 106
+    },
+    {
+      "testTitle": "Albumin [Mass/volume] in Serum or Plasma",
+      "unit": "g/dL",
+      "min": 3.4,
+      "max": 5.4
+    },
+    {
+      "testTitle": "Albumin Level",
+      "unit": "g/dL",
+      "min": 3.4,
+      "max": 5.4
+    },
+    {
+      "testTitle": "Albumin Level",
+      "unit": "mg/dL",
+      "min": 3500,
+      "max": 4500
+    },
+    {
+      "testTitle": "Aspartate aminotransferase [Enzymatic activity/volume] in Serum or Plasma",
+      "unit": "U/L",
+      "min": 0,
+      "max": 35
+    },
+    {
+      "testTitle": "Alanine aminotransferase [Enzymatic activity/volume] in Serum or Plasma",
+      "unit": "U/L",
+      "min": 0,
+      "max": 35
+    },
+    {
+      "testTitle": "Aminotransferase, alanine",
+      "unit": "U/L",
+      "min": 0,
+      "max": 35
+    },
+    {
+      "testTitle": "Aminotransferase, aspartate",
+      "unit": "U/L",
+      "min": 0,
+      "max": 35
+    },
+    {
+      "testTitle": "AST",
+      "unit": "unit/L",
+      "min": 0,
+      "max": 35
+    },
+    {
+      "testTitle": "ALT",
+      "unit": "unit/L",
+      "min": 0,
+      "max": 35
+    },
+    {
+      "testTitle": "Ketones [Mass/volume] in Urine by Test strip",
+      "unit": "mg/dL",
+      "min": 0,
+      "max": 0.6
+    },
+    {
+      "testTitle": "Globulin [Mass/volume] in Serum by calculation",
+      "unit": "g/L",
+      "min": 2,
+      "max": 3.9
+    },
+    {
+      "testTitle": "Calcium",
+      "unit": "mg/dL",
+      "min": 9,
+      "max": 10.5
+    },
+    {
+      "testTitle": "Calcium Level",
+      "unit": "mg/dL",
+      "min": 9,
+      "max": 10.5
+    },
+    {
+      "testTitle": "Hematocrit [Volume Fraction] of Blood by Automated count",
+      "unit": "%",
+      "gender": "Male",
+      "min": 41,
+      "max": 51
+    },
+    {
+      "testTitle": "Hct",
+      "unit": "%",
+      "gender": "Male",
+      "min": 41,
+      "max": 51
+    },
+    {
+      "testTitle": "Estimated Creatinine Clearance",
+      "unit": "mL/min",
+      "gender": "Male",
+      "min": 97,
+      "max": 137
+    },
+    {
+      "testTitle": "Bilirubin Total",
+      "unit": "mg/dL",
+      "min": 0.3,
+      "max": 1.2
+    },
+    {
+      "testTitle": "Bilirubin.total [Mass/volume] in Serum or Plasma",
+      "unit": "mg/dL",
+      "min": 0.3,
+      "max": 1.2
+    },
+    {
+      "testTitle": "Bilirubin.total [Presence] in Urine by Test strip",
+      "min": "Negative",
+      "max": "Negative"
+    },
+    {
+      "testTitle": "Carbon Dioxide",
+      "unit": "mmol/L",
+      "min": 23,
+      "max": 28
+    },
+    {
+      "testTitle": "CO2",
+      "unit": "mmol/L",
+      "min": 23,
+      "max": 28
+    },
+    {
+      "testTitle": "CO2 Total Arterial",
+      "unit": "mmol/L",
+      "min": 23,
+      "max": 38
+    },
+    {
+      "testTitle": "pCO2 Art",
+      "unit": "mmHg",
+      "min": 35,
+      "max": 45
+    },
+    {
+      "testTitle": "PCO2",
+      "unit": "mmHg",
+      "min": 35,
+      "max": 45
+    },
+    {
+      "testTitle": "Carbon dioxide partial pressure",
+      "unit": "mmHg",
+      "min": 35,
+      "max": 45
+    },
+    {
+      "testTitle": "HCO3 Art",
+      "unit": "mEq/L",
+      "min": 23,
+      "max": 28
+    },
+    {
+      "testTitle": "HCO3",
+      "unit": "mEq/L",
+      "min": 23,
+      "max": 28
+    },
+    {
+      "testTitle": "Bicarbonate",
+      "unit": "mEq/L",
+      "min": 23,
+      "max": 28
+    },
+    {
+      "testTitle": "Bicarbonate",
+      "unit": "mmol/L",
+      "min": 23,
+      "max": 28
+    },
+    {
+      "testTitle": "HCO3",
+      "unit": "mmol/L",
+      "min": 23,
+      "max": 28
+    },
+    {
+      "testTitle": "pO2 Art",
+      "unit": "mmHg",
+      "min": 80,
+      "max": 100
+    },
+    {
+      "testTitle": "PO2",
+      "unit": "mmHg",
+      "min": 80,
+      "max": 100
+    },
+    {
+      "testTitle": "Oxygen partial pressure",
+      "unit": "mmHg",
+      "min": 80,
+      "max": 100
+    },
+    {
+      "testTitle": "O2 Sat Art",
+      "unit": "%",
+      "min": 95,
+      "max": 100
+    },
+    {
+      "testTitle": "SpO2 (oxygen)",
+      "unit": "%",
+      "min": 95,
+      "max": 100
+    },
+    {
+      "testTitle": "Vanco Tr",
+      "unit": "mcg/mL",
+      "min": 5,
+      "max": 15
+    },
+    {
+      "testTitle": "Vancomycin trough",
+      "unit": "mcg/mL",
+      "min": 5,
+      "max": 15
+    },
+    {
+      "testTitle": "RBC",
+      "unit": "x10^12/L",
+      "min": 4.2,
+      "max": 5.9
+    },
+    {
+      "testTitle": "RBC",
+      "unit": "x1012 cells/L",
+      "min": 4.2,
+      "max": 5.9
+    },
+    {
+      "testTitle": "WBC",
+      "unit": "x10^9/L",
+      "min": 4.5,
+      "max": 11
+    },
+    {
+      "testTitle": "WBC",
+      "unit": "x109 cells/L",
+      "min": 4.5,
+      "max": 11
+    },
+    {
+      "testTitle": "Leukocyte esterase [Presence] in Urine by Test strip",
+      "min": 0,
+      "max": 5
+    },
+    {
+      "testTitle": "Leukocytes [#/volume] in Blood by Automated count",
+      "unit": "10*3/uL",
+      "min": 4.5,
+      "max": 11
+    },
+    {
+      "testTitle": "Microalbumin Creatinine Ratio",
+      "unit": "mg/g",
+      "min": "",
+      "max": 30
+    },
+    {
+      "testTitle": "Glucose [Presence] in Urine by Test strip",
+      "min": "Negative",
+      "max": "Negative"
+    },
+    {
+      "testTitle": "Nitrite [Presence] in Urine by Test strip",
+      "min": "Negative",
+      "max": "Negative"
+    },
+    {
+      "testTitle": "MCHC [Mass/volume] by Automated count",
+      "unit": "g/dL",
+      "min": 32,
+      "max": 36
+    },
+    {
+      "testTitle": "MCHC",
+      "unit": "g/dL",
+      "min": 32,
+      "max": 36
+    },
+    {
+      "testTitle": "Platelet mean volume [Entitic volume] in Blood by Automated count",
+      "unit": "fL",
+      "min": 9.4,
+      "max": 12.3
+    },
+    {
+      "testTitle": "MCV [Entitic volume] by Automated count",
+      "unit": "fL",
+      "min": 80,
+      "max": 100
+    },
+    {
+      "testTitle": "MCV",
+      "unit": "fL",
+      "min": 80,
+      "max": 100
+    },
+    {
+      "testTitle": "Platelets [#/volume] in Blood by Automated count",
+      "unit": "10*3/uL",
+      "min": 150,
+      "max": 400
+    },
+    {
+      "testTitle": "Platelet distribution width [Entitic volume] in Blood by Automated count",
+      "unit": "fL",
+      "min": 8.3,
+      "max": 25
+    },
+    {
+      "testTitle": "MCH [Entitic mass] by Automated count",
+      "unit": "pg",
+      "min": 25.4,
+      "max": 34.6
+    },
+    {
+      "testTitle": "Bilirubin.total [Mass/volume] in Urine by Test strip",
+      "unit": "mg/dL",
+      "min": 0,
+      "max": 5
+    },
+    {
+      "testTitle": "Alkaline phosphatase",
+      "unit": "U/L",
+      "min": 36,
+      "max": 150
+    },
+    {
+      "testTitle": "ALP",
+      "unit": "U/L",
+      "min": 36,
+      "max": 150
+    },
+    {
+      "testTitle": "Alkaline phosphatase [Enzymatic activity/volume] in Serum or Plasma",
+      "unit": "U/L",
+      "min": 36,
+      "max": 150
+    },
+    {
+      "testTitle": "Alk Phos",
+      "unit": "unit/L",
+      "min": 36,
+      "max": 150
+    },
+    {
+      "testTitle": "MPV",
+      "unit": "fL",
+      "min": 7,
+      "max": 12
+    },
+    {
+      "testTitle": "MCH",
+      "unit": "pg",
+      "min": 28,
+      "max": 32
+    },
+    {
+      "testTitle": "Mean corpuscular hemoglobin",
+      "unit": "pg",
+      "min": 28,
+      "max": 32
+    },
+    {
+      "testTitle": "Platelets",
+      "unit": "x10^9/L",
+      "min": 150,
+      "max": 350
+    },
+    {
+      "testTitle": "FiO2 Arterial",
+      "unit": "%",
+      "min": 0.21,
+      "max": 1
+    },
+    {
+      "testTitle": "RDW",
+      "unit": "%",
+      "gender": "Male",
+      "min": 11.8,
+      "max": 14.5
+    },
+    {
+      "testTitle": "Anion Gap",
+      "unit": "mEq/L",
+      "min": 3,
+      "max": 10
+    },
+    {
+      "testTitle": "Base Excess Arterial",
+      "unit": "mmol/L",
+      "min": 22,
+      "max": 26
+    },
+    {
+      "testTitle": "COVID-19 Ab IgG"
+    },
+    {
+      "testTitle": "Coronavirus COVID-19"
+    },
+    {
+      "testTitle": "COVID-19 Ab IgM"
+    },
+    {
+      "testTitle": "Wheat IgE Ab in Serum",
+      "unit": "kU/L",
+      "min": 0,
+      "max": 0.35
+    },
+    {
+      "testTitle": "Honey bee IgE Ab in Serum",
+      "unit": "kU/L",
+      "min": 0,
+      "max": 0.35
+    },
+    {
+      "testTitle": "Codfish IgE Ab in Serum",
+      "unit": "kU/L",
+      "min": 0,
+      "max": 0.35
+    },
+    {
+      "testTitle": "Egg white IgE Ab in Serum",
+      "unit": "kU/L",
+      "min": 0,
+      "max": 0.35
+    },
+    {
+      "testTitle": "Cow milk IgE Ab in Serum",
+      "unit": "kU/L",
+      "min": 0,
+      "max": 0.35
+    },
+    {
+      "testTitle": "American house dust mite IgE Ab in Serum",
+      "unit": "kU/L",
+      "min": 0,
+      "max": 0.35
+    },
+    {
+      "testTitle": "Common Ragweed IgE Ab in Serum",
+      "unit": "kU/L",
+      "min": 0,
+      "max": 0.35
+    },
+    {
+      "testTitle": "Cat dander IgE Ab in Serum",
+      "unit": "kU/L",
+      "min": 0,
+      "max": 0.35
+    },
+    {
+      "testTitle": "Latex IgE Ab in Serum",
+      "unit": "kU/L",
+      "min": 0,
+      "max": 0.35
+    },
+    {
+      "testTitle": "Walnut IgE Ab in Serum",
+      "unit": "kU/L",
+      "min": 0,
+      "max": 0.35
+    },
+    {
+      "testTitle": "White oak IgE Ab in Serum",
+      "unit": "kU/L",
+      "min": 0,
+      "max": 0.35
+    },
+    {
+      "testTitle": "Cladosporium herbarum IgE Ab in Serum",
+      "unit": "kU/L",
+      "min": 0,
+      "max": 0.35
+    },
+    {
+      "testTitle": "Shrimp IgE Ab in Serum",
+      "unit": "kU/L",
+      "min": 0,
+      "max": 0.35
+    },
+    {
+      "testTitle": "Peanut IgE Ab in Serum",
+      "unit": "kU/L",
+      "min": 0,
+      "max": 0.35
+    },
+    {
+      "testTitle": "Soybean IgE Ab in Serum",
+      "unit": "kU/L",
+      "min": 0,
+      "max": 0.35
+    },
+    {
+      "testTitle": "RDW - Erythrocyte distribution width Auto (RBC) [Entitic vol]",
+      "unit": "fL",
+      "min": 39,
+      "max": 46
+    },
+    {
+      "testTitle": "Hematocrit [Volume Fraction] of Blood",
+      "unit": "%",
+      "gender": "Female",
+      "min": 36,
+      "max": 47
+    },
+    {
+      "testTitle": "Hematocrit [Volume Fraction] of Blood",
+      "unit": "%",
+      "gender": "Male",
+      "min": 41,
+      "max": 51
+    },
+    {
+      "testTitle": "RBC Auto (Bld) [#/Vol]",
+      "unit": "10*6/uL",
+      "min": 4.2,
+      "max": 5.9
+    },
+    {
+      "testTitle": "WBC Auto (Bld) [#/Vol]",
+      "unit": "10*3/uL",
+      "min": 4.5,
+      "max": 11
+    },
+    {
+      "testTitle": "Prostate specific Ag [Mass/volume] in Serum or Plasma",
+      "unit": "ng/mL",
+      "min": 0,
+      "max": 4
+    }
+  ]
+}

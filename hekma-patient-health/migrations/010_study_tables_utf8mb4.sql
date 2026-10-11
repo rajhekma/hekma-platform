@@ -1,0 +1,35 @@
+-- =============================================================================
+-- Fix MySQL 1366: Unicode from ClinicalTrials.gov (≥, β, etc.) on latin1 columns
+-- =============================================================================
+-- Each ALTER converts ALL string columns on that table to utf8mb4 (not just one).
+-- Run against the same database as MYSQL_DATABASE in .env (often `operations`).
+--
+-- Example (mysql client):
+--   mysql -h "$MYSQL_HOST" -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" < migrations/010_study_tables_utf8mb4.sql
+--
+-- Example (Python, same MYSQL_* as .env):
+--   python load_demo_trails.py --apply-sql migrations/010_study_tables_utf8mb4.sql
+--     → runs only if monitored Study columns are not utf8mb4; otherwise skips (safe after initial migrate).
+--   python load_demo_trails.py --apply-sql migrations/010_study_tables_utf8mb4.sql --force-sql
+--     → always execute ALTERs (e.g. re-run after manual changes).
+--   python load_demo_trails.py --apply-sql ... --then-load
+--     → apply-if-needed, then full validation + fetch + load.
+--
+-- If you use a different schema than the default DB, add at the top:
+--   USE operations;
+-- Or qualify tables: ALTER TABLE operations.Study ...
+--
+-- Before:
+--   SHOW FULL COLUMNS FROM Study;
+-- After (expect utf8mb4 on varchar/text columns):
+--   SELECT TABLE_NAME, COLUMN_NAME, CHARACTER_SET_NAME, COLLATION_NAME
+--   FROM information_schema.COLUMNS
+--   WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN ('Study','StudyEvent','StudyArm')
+--     AND CHARACTER_SET_NAME IS NOT NULL;
+--
+-- MySQL 8.0+ optional collation (stricter sorting): utf8mb4_0900_ai_ci
+-- =============================================================================
+
+-- ALTER TABLE Study CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- ALTER TABLE StudyEvent CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- ALTER TABLE StudyArm CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

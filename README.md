@@ -13,6 +13,7 @@ cp .env.example .env
 |---------|------------|
 | API Gateway (nginx) | http://localhost:9080 |
 | AI Usage API | http://localhost:8090 |
+| Patient Health | http://localhost:8010 |
 | PostgreSQL | `localhost:5433` (user `hekma`, db `hekma_platform`) |
 | MySQL (CTMS) | `localhost:3307` |
 | Redis | `localhost:6379` |
@@ -27,6 +28,7 @@ Point existing monoliths at these hosts while you extract microservices:
 
 ```
 hekma-platform/
+├── hekma-patient-health/ # S3: profile, EHR, FHIR, medications, account deletion
 ├── hekma-ai-usage/       # one service: src/api, src/service, src/repository
 ├── api-gateway/          # nginx routes (monolith → new services)
 ├── docker-compose.yml    # local Postgres, MySQL, Redis, LocalStack, gateway, AI usage
@@ -50,6 +52,8 @@ Each business service is a `hekma-{service-name}/` folder with `Dockerfile`, `sr
 - **[docs/TENANCY_DESIGN.md](docs/TENANCY_DESIGN.md)** — multi-org work, when you need it
 - **[docs/MONETIZATION_ROADMAP.md](docs/MONETIZATION_ROADMAP.md)** — subscriptions, metering, tenancy: roadmap for leadership
 - [docs/TENANCY_LEADERSHIP_OVERVIEW.md](docs/TENANCY_LEADERSHIP_OVERVIEW.md) — business-level, for leadership
+- [hekma-patient-health/README.md](hekma-patient-health/README.md) — S3 Patient Health (profile, EHR, FHIR, meds, deletion)
+- [hekma-ai-usage/docs/AI_USAGE.md](hekma-ai-usage/docs/AI_USAGE.md) — AI Usage: components, APIs, and diagrams
 - [hekma-ai-usage/docs/AI_USAGE_OVERVIEW.md](hekma-ai-usage/docs/AI_USAGE_OVERVIEW.md) — why AI Usage exists and the architecture choices
 - [hekma-ai-usage/docs/AI_USAGE_HLD.md](hekma-ai-usage/docs/AI_USAGE_HLD.md) — developer design: components, APIs, pricing, how to emit
 - [hekma-ai-usage/docs/AI_COST_ANALYTICS.md](hekma-ai-usage/docs/AI_COST_ANALYTICS.md) — short API reference for the same service

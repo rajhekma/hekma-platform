@@ -13,7 +13,7 @@ from uuid import UUID
 
 from service.pricing import ModelPrice
 from repository.store import _aware, _rollup
-from api.schemas import UsageEventOut, money
+from service.models import UsageEventOut, money
 
 SEED_PRICES = [
     ("openai", "gpt-4o", "2.5", "10", "2024-08-01T00:00:00+00:00"),

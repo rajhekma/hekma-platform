@@ -1,62 +1,253 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
   title: Hekma AI Usage
   version: 1.0.0
-  description: |
-    Patient-level ledger for successful LLM calls. Cost is frozen at ingest.
-    Prompts and clinical text are not accepted.
-servers:
-  - url: http://localhost:8090
 paths:
-  /health:
-    get:
-      summary: Process and database health
-      operationId: health
-      responses:
-        "200":
-          description: Health
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Health"
   /v1/ai-cost/health:
     get:
-      summary: Same health check on the versioned path
-      operationId: healthV1
+      summary: Health
+      operationId: health_v1_ai_cost_health_get
       responses:
-        "200":
-          description: Health
+        '200':
+          description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Health"
+                $ref: '#/components/schemas/HealthResponse'
+  /health:
+    get:
+      summary: Health
+      operationId: health_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /v1/patients/{patient_id}/ai-cost:
+    get:
+      summary: Patient Cost
+      operationId: patient_cost_v1_patients__patient_id__ai_cost_get
+      parameters:
+      - name: patient_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Patient Id
+      - name: product
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Product
+      - name: tenant_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Tenant Id
+      - name: from
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: From
+      - name: to
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: To
+      - name: X-API-Key
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Api-Key
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientCostResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/patients/{patient_id}/ai-cost/events:
+    get:
+      summary: Patient Events
+      operationId: patient_events_v1_patients__patient_id__ai_cost_events_get
+      parameters:
+      - name: patient_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Patient Id
+      - name: product
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Product
+      - name: tenant_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Tenant Id
+      - name: from
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: From
+      - name: to
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: To
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 1
+          default: 100
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      - name: X-API-Key
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Api-Key
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventListResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/ai-cost/prices:
+    get:
+      summary: List Prices
+      operationId: list_prices_v1_ai_cost_prices_get
+      parameters:
+      - name: X-API-Key
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Api-Key
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PriceRow'
+                title: Response List Prices V1 Ai Cost Prices Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /internal/v1/ai-usage/events:
     post:
-      summary: Price and store one usage event
-      operationId: ingestEvent
+      summary: Ingest Event
+      operationId: ingest_event_internal_v1_ai_usage_events_post
       parameters:
-        - $ref: "#/components/parameters/ApiKey"
+      - name: X-API-Key
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Api-Key
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UsageEvent"
+              $ref: '#/components/schemas/UsageEventIn'
       responses:
-        "200":
-          description: Stored or recognized as a duplicate
+        '200':
+          description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/IngestResult"
-        "422":
-          description: Invalid event
+                $ref: '#/components/schemas/IngestResult'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /internal/v1/ai-usage/events:batch:
     post:
-      summary: Price and store a list of usage events
-      operationId: ingestBatch
+      summary: Ingest Batch
+      operationId: ingest_batch_internal_v1_ai_usage_events_batch_post
       parameters:
-        - $ref: "#/components/parameters/ApiKey"
+      - name: X-API-Key
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Api-Key
       requestBody:
         required: true
         content:
@@ -64,244 +255,459 @@ paths:
             schema:
               type: array
               items:
-                $ref: "#/components/schemas/UsageEvent"
+                $ref: '#/components/schemas/UsageEventIn'
+              title: Body
       responses:
-        "200":
-          description: One result per event
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/IngestResult"
-  /v1/patients/{patient_id}/ai-cost:
-    get:
-      summary: Token and USD totals for one patient
-      operationId: patientCost
-      parameters:
-        - $ref: "#/components/parameters/PatientId"
-        - $ref: "#/components/parameters/ApiKey"
-        - $ref: "#/components/parameters/From"
-        - $ref: "#/components/parameters/To"
-        - $ref: "#/components/parameters/Product"
-        - $ref: "#/components/parameters/TenantId"
-      responses:
-        "200":
-          description: Frozen cost for the half-open period
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PatientCost"
-        "400":
-          description: Period end is not after the start
-  /v1/patients/{patient_id}/ai-cost/events:
-    get:
-      summary: Individual model calls for one patient
-      operationId: patientEvents
-      parameters:
-        - $ref: "#/components/parameters/PatientId"
-        - $ref: "#/components/parameters/ApiKey"
-        - $ref: "#/components/parameters/From"
-        - $ref: "#/components/parameters/To"
-        - $ref: "#/components/parameters/Product"
-        - $ref: "#/components/parameters/TenantId"
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 500
-            default: 100
-        - name: offset
-          in: query
-          schema:
-            type: integer
-            minimum: 0
-            default: 0
-      responses:
-        "200":
-          description: Event page
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EventList"
-  /v1/ai-cost/prices:
-    get:
-      summary: Current model price catalog
-      operationId: listPrices
-      parameters:
-        - $ref: "#/components/parameters/ApiKey"
-      responses:
-        "200":
-          description: USD per one million tokens
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/PriceRow"
+                $ref: '#/components/schemas/HTTPValidationError'
 components:
-  parameters:
-    ApiKey:
-      name: X-API-Key
-      in: header
-      required: false
-      schema:
-        type: string
-      description: Required only when AI_COST_API_KEY is set on the service.
-    PatientId:
-      name: patient_id
-      in: path
-      required: true
-      schema:
-        type: string
-    From:
-      name: from
-      in: query
-      schema:
-        type: string
-        format: date-time
-    To:
-      name: to
-      in: query
-      schema:
-        type: string
-        format: date-time
-      description: Exclusive end of the period.
-    Product:
-      name: product
-      in: query
-      schema:
-        type: string
-        enum: [scan_ai, patient_summary, trial_match]
-    TenantId:
-      name: tenant_id
-      in: query
-      schema:
-        type: integer
   schemas:
-    Health:
-      type: object
-      properties:
-        status:
-          type: string
-        service:
-          type: string
-        database:
-          type: string
-        sqs:
-          type: string
-    UsageEvent:
-      type: object
-      required: [occurred_at, patient_id, product, provider, model]
-      properties:
-        schema_version:
-          type: integer
-        request_id:
-          type: string
-          format: uuid
-        occurred_at:
-          type: string
-          format: date-time
-        tenant_id:
-          type: integer
-        patient_id:
-          type: string
-        product:
-          type: string
-          enum: [scan_ai, patient_summary, trial_match]
-        feature:
-          type: string
-        provider:
-          type: string
-        model:
-          type: string
-        prompt_tokens:
-          type: integer
-        completion_tokens:
-          type: integer
-        total_tokens:
-          type: integer
-        cached:
-          type: boolean
-        job_id:
-          type: string
-        source_service:
-          type: string
-    IngestResult:
-      type: object
-      properties:
-        accepted:
-          type: boolean
-        duplicate:
-          type: boolean
-        request_id:
-          type: string
-          format: uuid
-        pricing_status:
-          type: string
-        cost_usd:
-          type: number
     CostBucket:
-      type: object
       properties:
         llm_calls:
           type: integer
+          title: Llm Calls
+          default: 0
         prompt_tokens:
           type: integer
+          title: Prompt Tokens
+          default: 0
         completion_tokens:
           type: integer
+          title: Completion Tokens
+          default: 0
         total_tokens:
           type: integer
+          title: Total Tokens
+          default: 0
         cost_usd:
           type: number
+          title: Cost Usd
+          default: 0.0
         unpriced_calls:
           type: integer
-    PatientCost:
+          title: Unpriced Calls
+          default: 0
       type: object
+      title: CostBucket
+    EventListResponse:
       properties:
         patient_id:
           type: string
-        tenant_id:
-          type: integer
-        currency:
-          type: string
-        totals:
-          $ref: "#/components/schemas/CostBucket"
-        by_product:
-          type: array
-          items:
-            type: object
-        by_provider:
-          type: array
-          items:
-            type: object
-    EventList:
-      type: object
-      properties:
-        patient_id:
-          type: string
+          title: Patient Id
         total:
           type: integer
+          title: Total
         events:
-          type: array
           items:
-            type: object
-    PriceRow:
+            $ref: '#/components/schemas/UsageEventOut'
+          type: array
+          title: Events
       type: object
+      required:
+      - patient_id
+      - total
+      - events
+      title: EventListResponse
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    HealthResponse:
+      properties:
+        status:
+          type: string
+          title: Status
+        service:
+          type: string
+          title: Service
+          default: ai-usage
+        database:
+          type: string
+          title: Database
+          default: unknown
+        sqs:
+          type: string
+          title: Sqs
+          default: disabled
+      type: object
+      required:
+      - status
+      title: HealthResponse
+    IngestResult:
+      properties:
+        accepted:
+          type: boolean
+          title: Accepted
+        duplicate:
+          type: boolean
+          title: Duplicate
+          default: false
+        request_id:
+          type: string
+          format: uuid
+          title: Request Id
+        pricing_status:
+          type: string
+          title: Pricing Status
+        cost_usd:
+          type: number
+          title: Cost Usd
+          default: 0.0
+      type: object
+      required:
+      - accepted
+      - request_id
+      - pricing_status
+      title: IngestResult
+    ModelCost:
+      properties:
+        llm_calls:
+          type: integer
+          title: Llm Calls
+          default: 0
+        prompt_tokens:
+          type: integer
+          title: Prompt Tokens
+          default: 0
+        completion_tokens:
+          type: integer
+          title: Completion Tokens
+          default: 0
+        total_tokens:
+          type: integer
+          title: Total Tokens
+          default: 0
+        cost_usd:
+          type: number
+          title: Cost Usd
+          default: 0.0
+        unpriced_calls:
+          type: integer
+          title: Unpriced Calls
+          default: 0
+        model:
+          type: string
+          title: Model
+      type: object
+      required:
+      - model
+      title: ModelCost
+    PatientCostResponse:
+      properties:
+        patient_id:
+          type: string
+          title: Patient Id
+        tenant_id:
+          type: integer
+          title: Tenant Id
+        period:
+          $ref: '#/components/schemas/Period'
+        currency:
+          type: string
+          title: Currency
+          default: USD
+        totals:
+          $ref: '#/components/schemas/CostBucket'
+        by_product:
+          items:
+            $ref: '#/components/schemas/ProductCost'
+          type: array
+          title: By Product
+        by_provider:
+          items:
+            $ref: '#/components/schemas/ProviderCost'
+          type: array
+          title: By Provider
+      type: object
+      required:
+      - patient_id
+      - tenant_id
+      - period
+      - totals
+      - by_product
+      - by_provider
+      title: PatientCostResponse
+    Period:
+      properties:
+        from:
+          type: string
+          format: date-time
+          title: From
+        to:
+          type: string
+          format: date-time
+          title: To
+      type: object
+      required:
+      - from
+      - to
+      title: Period
+    PriceRow:
       properties:
         provider:
           type: string
+          title: Provider
         model:
           type: string
+          title: Model
         input_usd_per_1m:
           type: number
+          title: Input Usd Per 1M
         output_usd_per_1m:
           type: number
+          title: Output Usd Per 1M
         effective_from:
           type: string
           format: date-time
+          title: Effective From
         effective_to:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Effective To
+      type: object
+      required:
+      - provider
+      - model
+      - input_usd_per_1m
+      - output_usd_per_1m
+      - effective_from
+      title: PriceRow
+    ProductCost:
+      properties:
+        llm_calls:
+          type: integer
+          title: Llm Calls
+          default: 0
+        prompt_tokens:
+          type: integer
+          title: Prompt Tokens
+          default: 0
+        completion_tokens:
+          type: integer
+          title: Completion Tokens
+          default: 0
+        total_tokens:
+          type: integer
+          title: Total Tokens
+          default: 0
+        cost_usd:
+          type: number
+          title: Cost Usd
+          default: 0.0
+        unpriced_calls:
+          type: integer
+          title: Unpriced Calls
+          default: 0
+        product:
+          type: string
+          title: Product
+      type: object
+      required:
+      - product
+      title: ProductCost
+    ProviderCost:
+      properties:
+        llm_calls:
+          type: integer
+          title: Llm Calls
+          default: 0
+        prompt_tokens:
+          type: integer
+          title: Prompt Tokens
+          default: 0
+        completion_tokens:
+          type: integer
+          title: Completion Tokens
+          default: 0
+        total_tokens:
+          type: integer
+          title: Total Tokens
+          default: 0
+        cost_usd:
+          type: number
+          title: Cost Usd
+          default: 0.0
+        unpriced_calls:
+          type: integer
+          title: Unpriced Calls
+          default: 0
+        provider:
+          type: string
+          title: Provider
+        models:
+          items:
+            $ref: '#/components/schemas/ModelCost'
+          type: array
+          title: Models
+      type: object
+      required:
+      - provider
+      title: ProviderCost
+    UsageEventIn:
+      properties:
+        schema_version:
+          type: integer
+          title: Schema Version
+          default: 1
+        request_id:
+          type: string
+          format: uuid
+          title: Request Id
+        occurred_at:
           type: string
           format: date-time
-          nullable: true
+          title: Occurred At
+        tenant_id:
+          type: integer
+          title: Tenant Id
+          default: 1
+        patient_id:
+          type: string
+          title: Patient Id
+        product:
+          type: string
+          title: Product
+        feature:
+          type: string
+          title: Feature
+          default: ''
+        provider:
+          type: string
+          title: Provider
+        model:
+          type: string
+          title: Model
+        prompt_tokens:
+          type: integer
+          title: Prompt Tokens
+          default: 0
+        completion_tokens:
+          type: integer
+          title: Completion Tokens
+          default: 0
+        total_tokens:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Total Tokens
+        cached:
+          type: boolean
+          title: Cached
+          default: false
+        job_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Job Id
+        source_service:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Source Service
+      type: object
+      required:
+      - occurred_at
+      - patient_id
+      - product
+      - provider
+      - model
+      title: UsageEventIn
+    UsageEventOut:
+      properties:
+        request_id:
+          type: string
+          format: uuid
+          title: Request Id
+        occurred_at:
+          type: string
+          format: date-time
+          title: Occurred At
+        product:
+          type: string
+          title: Product
+        feature:
+          type: string
+          title: Feature
+        provider:
+          type: string
+          title: Provider
+        model:
+          type: string
+          title: Model
+        prompt_tokens:
+          type: integer
+          title: Prompt Tokens
+        completion_tokens:
+          type: integer
+          title: Completion Tokens
+        total_tokens:
+          type: integer
+          title: Total Tokens
+        cost_usd:
+          type: number
+          title: Cost Usd
+        pricing_status:
+          type: string
+          title: Pricing Status
+        job_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Job Id
+        source_service:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Source Service
+      type: object
+      required:
+      - request_id
+      - occurred_at
+      - product
+      - feature
+      - provider
+      - model
+      - prompt_tokens
+      - completion_tokens
+      - total_tokens
+      - cost_usd
+      - pricing_status
+      title: UsageEventOut
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError

@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Optional
 
 from repository.store import UsageRepository
-from api.schemas import (
+from service.models import (
     CostBucket,
     ModelCost,
     PatientCostResponse,

@@ -7,7 +7,7 @@ from uuid import UUID
 
 from service.pricing import price_tokens
 from repository.store import UsageRepository
-from api.schemas import IngestResult, UsageEventIn
+from service.models import IngestResult, UsageEventIn
 
 logger = logging.getLogger(__name__)
 

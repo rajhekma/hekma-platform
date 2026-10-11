@@ -1,0 +1,154 @@
+{
+  "Condition" : [
+    "InternalCondition","fastenhealth_condition","Condition"
+  ],
+  "Procedure"  : [
+    "InternalProcedure","Procedure", "fastenhealth_procedure"
+
+  ],
+  "Immunization": [
+    "InternalImmunization","Immunization", "fastenhealth_immunization"
+  ],
+  "Observation" : [
+     "InternalObservationVital","InternalObservation","Observation", "fastenhealth_observation", "HekmaBmi"
+  ],
+  "MedicationOrder": [
+    "InternalMedication","MedicationOrder", "fastenhealth_medicationorder", "HekmaMedication"
+  ],
+  "AllergyIntolerance" : [
+    "InternalAllergyIntolerance","AllergyIntolerance", "fastenhealth_allergyintolerance"
+  ],
+  "mapping" : {
+    "HekmaBmi": {
+      "type": "hekma_bmi",
+      "table": "fastenhealth_bmi_data",
+      "note": "Read by ehr_apis/bmi_rows.py (computed BMI rows are excluded by EHR_SOURCE_PREDICATE)"
+    },
+    "InternalObservationVital":{
+      "type": "ctms",
+      "sql": "select distinct 'final' as Status, DATE_FORMAT(dateOfObservation,'%Y-%m-%d') as date_of_observation, DATE_FORMAT(dateOfObservation,'%Y-%m-%d') as sort_date,type as Name,'Y' as internal,'vital-signs' as category_code,M.id internal_ref, M.refValue1, M.refValue2, M.metric, M.tags, M.notes from Vitalsign M WHERE M.is_deleted=0 and M.patientId IN ({patient_ids})"
+    },
+    "InternalObservation":{
+      "type": "ctms",
+      "sql": "select distinct M.testName as Name,'final' as Status, DATE_FORMAT(resultDate,'%Y-%m-%d') as date_of_observation, DATE_FORMAT(resultDate,'%Y-%m-%d') as sort_date,'Y' as internal,'laboratory' as category_code,M.id internal_ref, M.notes, M.imageUrl, M.testValue, M.unit, M.referenceRange from LabReports M WHERE M.is_deleted=0 and M.patientId IN ({patient_ids})"
+    },
+    "Condition": {
+      "Condition": "code.text",
+      "Status":"clinicalStatus|O",
+      "date_of_diagnosis": "onsetDateTime_10|O",
+      "sort_date": "onsetDateTime_10|O"
+    },
+     "fastenhealth_condition": {
+        "Condition": "code.text",
+        "Status":"clinicalStatus.coding[0].code",
+        "date_of_diagnosis": "onsetDateTime_10",
+         "sort_date": "onsetDateTime_10"
+     },
+    "InternalCondition": {
+      "type": "ctms",
+      "sql": "select distinct M.conditionName as `Condition`,lower(M.status) as Status, DATE_FORMAT(startDate,'%Y-%m-%d') as date_of_diagnosis, DATE_FORMAT(startDate,'%Y-%m-%d') as sort_date,'Y' as internal,M.id internal_ref, M.notes, DATE_FORMAT(M.startDate,'%Y-%m-%d') as start_date, DATE_FORMAT(endDate,'%Y-%m-%d') as end_date  from MedicalCondition M WHERE (M.is_deleted IS NULL OR M.is_deleted != 'Y') and M.patientId IN ({patient_ids})"
+    },
+      "InternalProcedure": {
+      "type": "ctms",
+      "sql": "select M.procedureName as Name,lower(M.status) as Status, DATE_FORMAT(startDate,'%Y-%m-%d') as date_of_procedure,  DATE_FORMAT(startDate,'%Y-%m-%d') as sort_date,'Y' as internal,M.id internal_ref, M.location, M.reason,  DATE_FORMAT(M.startDate,'%Y-%m-%d') as start_date, DATE_FORMAT(M.endDate,'%Y-%m-%d') as end_date, M.notes  from Procedures  M WHERE (M.is_deleted IS NULL OR M.is_deleted != 'Y') and M.patientId IN ({patient_ids})"
+    },
+    "Procedure": {
+      "Name": "code.text",
+      "Status":"status",
+      "date_of_procedure": "performedPeriod.start_10",
+         "sort_date": "performedPeriod.start_10"
+    },
+     "fastenhealth_procedure": {
+      "Name": "code.text",
+      "Status":"status",
+      "date_of_procedure": "performedPeriod.start_10",
+         "sort_date": "performedPeriod.start_10"
+     },
+        "InternalImmunization": {
+      "type": "ctms",
+      "sql": "select distinct M.vaccineName as Name, DATE_FORMAT(vaccinationDate,'%Y-%m-%d') as date_of_immunization, DATE_FORMAT(vaccinationDate,'%Y-%m-%d') as sort_date,'Y' as internal,M.id internal_ref, M.notes from Immunization M WHERE M.is_deleted=0 and  M.patientId IN ({patient_ids})"
+    },
+    "Immunization": {
+      "Name": "vaccineCode.text",
+      "date_of_immunization": "date_10",
+         "sort_date": "date_10"
+    },
+     "fastenhealth_immunization": {
+      "Name": "vaccineCode.text",
+      "date_of_immunization": "date_10",
+         "sort_date": "date_10"
+     },
+    "Observation" :{
+      "Name": "code.text",
+      "Status": "status",
+      "value_quantity": "valueQuantity|O",
+      "date_of_observation":"effectiveDateTime_10|O",
+      "reference":"subject.reference",
+      "category": "category.text",
+       "category_code": "category[0].coding[0].code",
+      "sort_date": "effectiveDateTime_10|O",
+      "optionalvs_result_text":"valueString",
+      "optional_result_text": "valueCodeableConcept.text",
+      "result_text": "component[0].code.text",
+      "optional_value_quantity": "component[0].valueQuantity"
+},
+    "fastenhealth_observation" :{
+      "Name": "code.text",
+      "Status": "status",
+      "value_quantity": "valueQuantity|O",
+      "date_of_observation":"effectiveDateTime_10|O",
+      "reference":"subject.reference",
+      "category": "category[0].coding[0].display",
+      "category_code": "category[0].coding[0].code",
+      "sort_date": "effectiveDateTime_10|O",
+      "optionalvs_result_text":"valueString",
+      "optional_result_text": "valueCodeableConcept.text",
+      "result_text": "component[0].code.text",
+      "optional_value_quantity": "component[0].valueQuantity"
+},
+    "InternalAllergyIntolerance": {
+      "type": "ctms",
+      "sql": "select M.substance as name,lower(M.status) as status,severity as criticality, DATE_FORMAT(startDate,'%Y-%m-%d') as onset,  DATE_FORMAT(startDate,'%Y-%m-%d') as sort_date,'Y' as internal,M.id internal_ref, M.allergyType as allergy_type, M.category, DATE_FORMAT(M.startDate,'%Y-%m-%d') as start_date, DATE_FORMAT(M.endDate,'%Y-%m-%d') as end_date, M.notes   from Allergies  M WHERE (M.is_deleted IS NULL OR M.is_deleted != 'Y') and M.patientId IN ({patient_ids})"
+    },
+    "AllergyIntolerance" : {"name":  "substance.text",
+      "status": "status",
+      "category": "category|O",
+      "criticality": "criticality",
+      "onset": "onset_10",
+      "sort_date": "onset_10"
+
+    },
+    "fastenhealth_allergyintolerance": {"name":  "substance.text",
+      "status": "status",
+      "category": "category|O",
+      "criticality": "criticality",
+      "onset": "onset_10",
+      "sort_date": "onset_10"},
+    "MedicationOrder" : {"name":  "medicationCodeableConcept.text",
+      "status": "status",
+      "date_written": "dateWritten_10",
+      "date_ended": "dateEnded_10",
+
+      "sort_date": "dateWritten_10"
+    },
+      "InternalMedication" : {
+            "type": "ctms",
+      "sql": "select distinct M.medicationName as name,lower(M.status) as status, DATE_FORMAT(startDate,'%Y-%m-%d') as date_of_diagnosis, DATE_FORMAT(startDate,'%Y-%m-%d') as sort_date,'Y' as internal,M.id internal_ref, M.notes,M.dosage, M.frequency, M.customFrequency, M.imageUrl, DATE_FORMAT(M.startDate,'%Y-%m-%d') as start_date, DATE_FORMAT(endDate,'%Y-%m-%d') as end_date,image_id, image_name   from Medication M WHERE (M.is_deleted IS NULL OR M.is_deleted != 'Y') and M.patientId IN ({patient_ids})"
+    },
+  "fastenhealth_medicationorder" : {
+      "name":  "medicationCodeableConcept.text",
+      "status": "status",
+      "date_written": "dateWritten_10",
+      "date_ended": "dateEnded_10",
+      "sort_date": "dateWritten_10"
+    },
+    "MedicationRequest_CMS": {
+      "name": "medicationCodeableConcept.text",
+      "status": "status",
+      "date_written": "authoredOn_10",
+      "date_ended": "authoredOn_10",
+      "sort_date": "authoredOn_10"
+
+    }
+  }
+}

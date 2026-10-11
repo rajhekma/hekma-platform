@@ -9,7 +9,7 @@ from typing import Any, Optional, Protocol
 from uuid import UUID
 
 from service.pricing import ModelPrice
-from api.schemas import UsageEventOut, money
+from service.models import UsageEventOut, money
 
 
 MIGRATIONS_DIR = Path(__file__).resolve().parents[2] / "migrations"

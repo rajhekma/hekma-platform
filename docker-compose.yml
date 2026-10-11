@@ -87,6 +87,40 @@ services:
       timeout: 3s
       retries: 12
 
+  patient-health:
+    build: ./hekma-patient-health
+    container_name: hekma-platform-patient-health
+    environment:
+      JWT_SECRET: ${JWT_SECRET:-local-dev-only-change-me}
+      JWT_ALGORITHM: HS512
+      PG_HOST: postgres
+      PG_PORT: 5432
+      PG_USER: ${POSTGRES_USER:-hekma}
+      PG_PASSWORD: ${POSTGRES_PASSWORD:-hekma_local_dev}
+      PG_DB: ${POSTGRES_DB:-hekma_platform}
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: ${MYSQL_USER:-hekma}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-hekma_local_dev}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-operations_hekma}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CACHE_REPROCESS_API_KEY: ${CACHE_REPROCESS_API_KEY:-}
+    ports:
+      - "${PATIENT_HEALTH_PORT:-8010}:8010"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8010/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
   api-gateway:
     image: nginx:1.27-alpine
     container_name: hekma-platform-gateway
@@ -102,6 +136,8 @@ services:
       redis:
         condition: service_healthy
       ai-usage:
+        condition: service_healthy
+      patient-health:
         condition: service_healthy
 
 volumes:

@@ -70,7 +70,7 @@ flowchart LR
 | Ingest | Validate the event, drop cache hits, look up the price, insert one row. `request_id` is the idempotency key. |
 | Price catalog | Versioned USD per 1M input and output tokens. Cost is calculated here, not in the product service. |
 | Query | Sum stored tokens and `cost_usd`. It does not re-price history. |
-| Gateway | Routes `/v1/patients/`, `/v1/ai-cost/`, and `/internal/v1/ai-usage/` to this API. |
+| Gateway | Publishes `/v1/patients/` and `/v1/ai-cost/` only. Ingest is not on the gateway. |
 | Dashboard | Read-only view: totals, service split, each call, and a separate price-catalog page. |
 
 ---
@@ -89,7 +89,7 @@ Failed calls emit nothing. Cache hits emit nothing (ingest also drops `cached: t
 
 ## 4. APIs
 
-Base URL: the AI Usage process on `:8090`, or the gateway on `:9080`. If `AI_COST_API_KEY` is set, send `X-API-Key`.
+Base URL: the AI Usage process on `:8090`. The gateway on `:9080` publishes patient cost, events, prices, and health. Ingest is not on the gateway. If `AI_COST_API_KEY` is set, send `X-API-Key`.
 
 | Method | Path | Caller | Result |
 |--------|------|--------|--------|
@@ -211,7 +211,7 @@ AI_USAGE_ENABLED=true
 AI_USAGE_INGEST_URL=http://<ai-usage-host>/internal/v1/ai-usage/events
 ```
 
-In a deployed environment, prefer SQS queue `ai-usage-recorded`. The API long-polls it when `AI_USAGE_SQS_ENABLED=true`. HTTP ingest remains for local development.
+In a deployed environment, prefer SQS queue `ai-usage-recorded`. The API long-polls it when `AI_USAGE_SQS_ENABLED=true`. HTTP ingest remains for local development and goes to the AI Usage process, not the public gateway.
 
 Worker threads must run inside a copied context (`copy_context().run`) or the patient id is lost. Matching and aggregation already do this.
 
@@ -224,8 +224,10 @@ Worker threads must run inside a copied context (`copy_context().run`) or the pa
 | Module | Function |
 |--------|----------|
 | `src/main.py` | Process entry. Builds the app and starts the optional queue worker |
-| `src/api/routes.py` | HTTP routes |
-| `src/api/schemas.py` | Event, cost, and price models. Products: `scan_ai`, `patient_summary`, `trial_match` |
+| `src/api/public.py` | Patient cost, events, prices, and health. The gateway publishes these |
+| `src/api/internal.py` | Ingest. Called on the service URL or via SQS, not through the gateway |
+| `src/service/models.py` | Event and cost records used by the service and the database |
+| `src/api/schemas.py` | HTTP-only health response |
 | `src/service/ingest.py` | Validate, drop cache, price, insert |
 | `src/service/pricing.py` | Alias, prefix match, cost formula |
 | `src/service/query.py` | Assemble totals, by product, by provider/model |

@@ -35,7 +35,7 @@ The patient-facing request never waits on metering. Failed LLM calls and cache h
 
 ## API
 
-Base: AI Usage API on `:8090`, or gateway `:9080`.
+Base: the AI Usage process on `:8090` for ingest and queries. The gateway on `:9080` publishes the patient cost routes only. Product services send events to the service URL, not to the gateway.
 
 | Method | Path | Purpose |
 |--------|------|---------|
