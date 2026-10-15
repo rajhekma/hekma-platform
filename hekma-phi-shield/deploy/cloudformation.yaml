@@ -1,0 +1,127 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Production Infrastructure for PII/PHI Security Layer (AWS ECS Fargate & Private Custom Domain)"
+
+Parameters:
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues: [production, staging, development]
+  DomainName:
+    Type: String
+    Default: "pii-phi.hekma.ai"
+    Description: "Private custom domain name for PII/PHI microservice"
+  AcmCertificateArn:
+    Type: String
+    Description: "ARN of the ACM TLS Certificate for *.hekma.ai"
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: "Target VPC ID"
+  PrivateSubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: "Private subnets for ECS Fargate tasks and Internal ALB"
+
+Resources:
+  # ── Dedicated KMS Customer Master Key (CMK) ────────────────────────
+  TokenVaultKmsKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: "Dedicated CMK for PII/PHI Token Vault Envelope Encryption"
+      Enabled: true
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: EnableIAMUserPermissions
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: "kms:*"
+            Resource: "*"
+
+  TokenVaultKmsKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: "alias/privacy-detection-token-vault-key"
+      TargetKeyId: !Ref TokenVaultKmsKey
+
+  # ── Security Groups ────────────────────────────────────────────────
+  AlbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Security Group for Internal ALB (pii-phi)"
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: "10.0.0.0/16"
+          Description: "Allow HTTPS from inside VPC"
+
+  EcsSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Security Group for ECS Fargate tasks"
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          SourceSecurityGroupId: !Ref AlbSecurityGroup
+          Description: "Allow traffic only from Internal ALB"
+
+  # ── Internal Application Load Balancer (ALB) ───────────────────────
+  InternalAlb:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub "pii-phi-alb-${Environment}"
+      Scheme: internal
+      Type: application
+      Subnets: !Ref PrivateSubnetIds
+      SecurityGroups:
+        - !Ref AlbSecurityGroup
+
+  AlbTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub "pii-phi-tg-${Environment}"
+      Port: 8080
+      Protocol: HTTP
+      VpcId: !Ref VpcId
+      TargetType: ip
+      HealthCheckPath: "/ready"
+      HealthCheckIntervalSeconds: 15
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 3
+
+  HttpsListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref InternalAlb
+      Port: 443
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: !Ref AcmCertificateArn
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref AlbTargetGroup
+
+  # ── ECS Cluster & Fargate Service ──────────────────────────────────
+  EcsCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub "pii-phi-cluster-${Environment}"
+
+  CloudWatchLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: "/ecs/pii-phi-security-service"
+      RetentionInDays: 30
+
+Outputs:
+  AlbDnsName:
+    Description: "Internal ALB DNS Name to point Route 53 ALIAS record to"
+    Value: !GetAtt InternalAlb.DNSName
+  KmsKeyArn:
+    Description: "Dedicated KMS Key ARN for Token Vault"
+    Value: !GetAtt TokenVaultKmsKey.Arn

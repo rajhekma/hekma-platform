@@ -1,0 +1,531 @@
+{
+  "info": {
+    "name": "Hekma Notification Service API",
+    "description": "Inter-service notification dispatch, SendGrid/SMS, in-app feed, and public support ticket API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Inter-Service Dispatch",
+      "item": [
+        {
+          "name": "1. Send Single Notification (Email)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Hekma-Service-Key",
+                "value": "{{service_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{notification_base_url}}/api/v1/notifications/send",
+              "host": [
+                "{{notification_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "send"
+              ],
+              "query": []
+            },
+            "description": "Queues a notification for async delivery via SendGrid email.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"channel\": \"EMAIL\",\n  \"recipient\": \"patient@hekma.com\",\n  \"title\": \"Clinical Trial Enrollment Confirmation\",\n  \"content\": \"Welcome to Hekma Clinical Trials. Your trial protocol has been initialized.\",\n  \"priority\": \"HIGH\",\n  \"templateParams\": {\n    \"patientName\": \"Jane Doe\",\n    \"trialTitle\": \"Phase III Oncology Study\"\n  },\n  \"sourceService\": \"hekma-identity-service\",\n  \"idempotencyKey\": \"test-idem-001\",\n  \"async\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"notification_id\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Send Single Notification (SMS)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Hekma-Service-Key",
+                "value": "{{service_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{notification_base_url}}/api/v1/notifications/send",
+              "host": [
+                "{{notification_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "send"
+              ],
+              "query": []
+            },
+            "description": "Dispatches SMS notification (mock provider in local dev).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"channel\": \"SMS\",\n  \"recipient\": \"+1234567890\",\n  \"title\": \"Verification Code\",\n  \"content\": \"Your Hekma OTP verification code is 123456.\",\n  \"priority\": \"HIGH\",\n  \"sourceService\": \"hekma-identity-service\",\n  \"idempotencyKey\": \"test-sms-001\",\n  \"async\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3. Broadcast Multi-Channel Alert",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Hekma-Service-Key",
+                "value": "{{service_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{notification_base_url}}/api/v1/notifications/broadcast",
+              "host": [
+                "{{notification_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "broadcast"
+              ],
+              "query": []
+            },
+            "description": "Simultaneously broadcasts alert to multiple channels.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"channels\": [\n    \"EMAIL\",\n    \"IN_APP\"\n  ],\n  \"email\": \"doctor@hekma.com\",\n  \"phone\": \"+1234567890\",\n  \"userId\": \"{{user_id}}\",\n  \"title\": \"Urgent Patient Vitals Alert\",\n  \"content\": \"Patient vitals in Room 304 have exceeded safe clinical thresholds.\",\n  \"priority\": \"URGENT\",\n  \"sourceService\": \"hekma-ctms-service\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4. Get Notification Delivery Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Hekma-Service-Key",
+                "value": "{{service_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{notification_base_url}}/api/v1/notifications/{{notification_id}}/status",
+              "host": [
+                "{{notification_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "{{notification_id}}",
+                "status"
+              ],
+              "query": []
+            },
+            "description": "Retrieves delivery status of a previously dispatched notification."
+          },
+          "response": []
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "In-App Notifications",
+      "item": [
+        {
+          "name": "1. Get User Notifications Feed",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{notification_base_url}}/api/v1/in-app-notifications?userId={{user_id}}&unreadOnly=false&page=0&size=20",
+              "host": [
+                "{{notification_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "in-app-notifications"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{user_id}}"
+                },
+                {
+                  "key": "unreadOnly",
+                  "value": "false"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Retrieves paginated in-app inbox notifications for user."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.content && jsonData.content.length > 0) {",
+                  "    pm.environment.set(\"in_app_id\", jsonData.content[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Get Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{notification_base_url}}/api/v1/in-app-notifications/unread-count?userId={{user_id}}",
+              "host": [
+                "{{notification_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "in-app-notifications",
+                "unread-count"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{user_id}}"
+                }
+              ]
+            },
+            "description": "Returns total count of unread notifications."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Mark Notification as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{notification_base_url}}/api/v1/in-app-notifications/{{in_app_id}}/read",
+              "host": [
+                "{{notification_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "in-app-notifications",
+                "{{in_app_id}}",
+                "read"
+              ],
+              "query": []
+            },
+            "description": "Marks specific notification as read."
+          },
+          "response": []
+        },
+        {
+          "name": "4. Mark All Notifications as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{notification_base_url}}/api/v1/in-app-notifications/read-all?userId={{user_id}}",
+              "host": [
+                "{{notification_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "in-app-notifications",
+                "read-all"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{user_id}}"
+                }
+              ]
+            },
+            "description": "Batch marks all notifications as read."
+          },
+          "response": []
+        },
+        {
+          "name": "5. Delete Notification",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{notification_base_url}}/api/v1/in-app-notifications/{{in_app_id}}",
+              "host": [
+                "{{notification_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "in-app-notifications",
+                "{{in_app_id}}"
+              ],
+              "query": []
+            },
+            "description": "Deletes notification from inbox."
+          },
+          "response": []
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "Support Center",
+      "item": [
+        {
+          "name": "1. Send Support OTP (Public)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{notification_base_url}}/api/v1/support/public/otp/send",
+              "host": [
+                "{{notification_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "support",
+                "public",
+                "otp",
+                "send"
+              ],
+              "query": []
+            },
+            "description": "Initiates guest support session verification code.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"patient.support@hekma.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.challengeId) {",
+                  "    pm.environment.set(\"support_challenge_id\", jsonData.data.challengeId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Verify Support OTP (Public)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{notification_base_url}}/api/v1/support/public/otp/verify",
+              "host": [
+                "{{notification_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "support",
+                "public",
+                "otp",
+                "verify"
+              ],
+              "query": []
+            },
+            "description": "Verifies support OTP and grants support session token.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"challengeId\": \"{{support_challenge_id}}\",\n  \"otpCode\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.sessionToken) {",
+                  "    pm.environment.set(\"support_session_token\", jsonData.data.sessionToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. Request Presigned Upload URL",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Support-Otp-Token",
+                "value": "{{support_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{notification_base_url}}/api/v1/support/public/file-upload",
+              "host": [
+                "{{notification_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "support",
+                "public",
+                "file-upload"
+              ],
+              "query": []
+            },
+            "description": "Generates presigned attachment upload URL.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"filename\": \"screenshot-issue.png\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": ""
+    }
+  ]
+}

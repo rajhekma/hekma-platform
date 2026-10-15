@@ -1,0 +1,14 @@
+jobs/Job_Pat2Trial_03/input/queries.jsonl
+dataset/trec_2022/corpus.jsonl
+dataset/trial_info.json
+dataset/trec_2021/corpus.jsonl
+jobs/*
+trialgpt_matching/__pycache__/__init__.cpython-312.pyc
+trialgpt_matching/__pycache__/run_matching.cpython-312.pyc
+trialgpt_matching/__pycache__/TrialGPT.cpython-312.pyc
+venv/
+.env.*
+!.env.example
+*.pyc
+TrialGPT_RAG/patient_block_summaries*.json
+TrialGPT_RAG/retrieved.json

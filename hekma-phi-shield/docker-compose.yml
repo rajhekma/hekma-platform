@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  phi-vault-db:
+    image: postgres:16-alpine
+    container_name: phi-vault-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword123
+      POSTGRES_DB: phi_vault
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d phi_vault"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  pii-phi-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pii-phi-service
+    environment:
+      - ENVIRONMENT=production
+      - SERVICE_PORT=8080
+      - CUSTOM_DOMAIN=https://pii-phi.hekma.ai
+      - STORAGE_BACKEND=postgresql
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgrespassword123@phi-vault-db:5432/phi_vault
+      - ENCRYPTION_KEY=6GURvslgC7xGn6unqU0bb9dhD3MgM-nGq2ewfr4PPoU=
+      - PHI_DETECTOR_BACKEND=openai
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_PHI_MODEL=gpt-4o-mini
+    ports:
+      - "8080:8080"
+    depends_on:
+      phi-vault-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:

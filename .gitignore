@@ -10,3 +10,25 @@ __pycache__/
 node_modules/
 .docker/
 hekma-ai-usage/data/
+
+# PHI Shield — optional: omit models from git (copy from PHI_PII or artifact store)
+# hekma-phi-shield/models/
+
+# Trial Matching — local datasets / scratch (keep source of truth in repo sibling if needed)
+hekma-trial-matching/.venv/
+hekma-trial-matching/scratch/
+hekma-trial-matching/results/
+
+# Java & Maven
+**/target/
+*.class
+*.jar
+*.war
+*.ear
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Secrets & Credentials
+*firebase-service-account*.json
+!*.example
+hekma-phi-shield/k8s/secret.yaml

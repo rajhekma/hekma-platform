@@ -1,0 +1,72 @@
+# ── Model weights & training binaries (large, not for git) ──
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.onnx
+
+# Legacy model folder
+**/PNN_PII_v14/
+
+# Intermediate training checkpoints (final model: models/roberta-pii-synthetic/)
+training/artifacts/*
+!training/artifacts/.gitkeep
+**/checkpoint-*/
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+
+# Local toolchain (e.g. portable Node used by run_local)
+.tools/
+
+# ── Secrets & local config ──
+.env
+.env.*
+!.env.example
+
+# ── Jupyter ──
+.ipynb_checkpoints/
+
+# ── IDE & OS ──
+.DS_Store
+Thumbs.db
+__MACOSX/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── Testing & linting ──
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+coverage/
+
+# ── ML experiment tracking ──
+wandb/
+mlruns/
+runs/
+tensorboard/
+lightning_logs/
+
+# ── Hugging Face cache (if downloaded locally) ──
+.cache/
+
+# ── Logs ──
+*.log
+logs/

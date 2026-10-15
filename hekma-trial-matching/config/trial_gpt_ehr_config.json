@@ -1,0 +1,7 @@
+{
+  "fastenPatientCreatedAtCutoff": "2026-08-06T08:32:01.801",
+  "mysqlPatientCreatedDateCutoff": "2026-08-06",
+  "summaryModes": ["llm"],
+  "p2tPreferredLlm": true,
+  "skipLargeTables": true
+}

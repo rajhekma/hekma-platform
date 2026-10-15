@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phi-pii-service
+  labels:
+    app: phi-pii-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: phi-pii-service
+  template:
+    metadata:
+      labels:
+        app: phi-pii-service
+    spec:
+      containers:
+        - name: api
+          image: your-registry/phi-pii-service:1.0.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ENVIRONMENT
+              value: production
+            - name: PHI_DETECTOR_BACKEND
+              value: openai
+            - name: OPENAI_PHI_MODEL
+              value: gpt-4o-mini
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: phi-pii-secrets
+                  key: OPENAI_API_KEY
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: phi-pii-secrets
+                  key: ENCRYPTION_KEY
+          resources:
+            requests:
+              memory: 2Gi
+              cpu: 500m
+            limits:
+              memory: 4Gi
+              cpu: "2"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 90
+            periodSeconds: 30

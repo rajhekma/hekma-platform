@@ -1,0 +1,28 @@
+---
+description: Shared AI Project Context and Workflow Rules
+globs: *
+alwaysApply: true
+---
+
+# Cursor Project Rules
+
+Use the repository's shared AI context system (`docs/ai/`).
+
+## Task Initiation & Context Navigation
+1. Read `AGENTS.md` first.
+2. Read `docs/ai/CONTEXT.md` for a concise overview (~500–1000 words).
+3. Read only relevant service context: `docs/ai/services/identity.md`.
+4. Avoid unnecessary repository-wide exploration or scanning all files.
+
+## Documentation References
+- **Architecture**: `docs/ai/ARCHITECTURE.md`
+- **Technical Decisions**: `docs/ai/DECISIONS.md`
+- **Current State**: `docs/ai/CURRENT.md`
+- **Coding Standards**: `docs/ai/CONVENTIONS.md`
+
+## Invariants & Execution Rules
+- The repository source code and Flyway migrations are the ultimate source of truth.
+- **Strict Plan-Only Rule**: When asked to prepare a plan, produce ONLY planning documentation. Never modify application code directly.
+- **Git Restrictions**: Never execute `git commit` or `git push` unless explicitly asked.
+- After completing significant development work, update the relevant shared documentation under `docs/ai/` per `AGENTS.md`.
+- Do not create a separate Cursor-only knowledge base.

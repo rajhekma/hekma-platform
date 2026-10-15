@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PII / PHI Detection — Validation Console</title>
+<link rel="stylesheet" href="/styles.css?v=7" />
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <h1>Validation Console</h1>
+      <p class="subtitle">PII &amp; PHI detection testing</p>
+    </div>
+    <div class="badge-row">
+      <div id="health-badge" class="badge badge-loading">PII…</div>
+      <div id="phi-health-badge" class="badge badge-loading">PHI…</div>
+    </div>
+  </div>
+</header>
+
+<!-- Home: pick PII or PHI -->
+<section id="view-home" class="view view-active">
+  <div class="home-intro">
+    <h2>What would you like to test?</h2>
+    <p class="hint">Choose a category to see only the tools and labels relevant to that data type.</p>
+  </div>
+  <div class="category-grid">
+    <button type="button" class="category-card category-card-pii" data-category="pii">
+      <span class="category-card-badge pii">PII</span>
+      <h3>Personally Identifiable Information</h3>
+      <p>Names, emails, SSN, phone numbers, credit cards, and more.</p>
+      <ul class="category-card-features">
+        <li>Local RoBERTa model</li>
+        <li>Predict · Validate · Mask · Batch</li>
+        <li>Anonymize &amp; token mappings</li>
+      </ul>
+      <span class="category-card-cta">Open PII workspace →</span>
+    </button>
+    <button type="button" class="category-card category-card-phi" data-category="phi">
+      <span class="category-card-badge phi">PHI</span>
+      <h3>Protected Health Information</h3>
+      <p>Clinical notes, diagnoses, medications, MRNs, and HIPAA identifiers.</p>
+      <ul class="category-card-features">
+        <li>OpenAI (swappable to local model)</li>
+        <li>Detect · Validate · Mask · Batch</li>
+        <li>Anonymize · Labels</li>
+      </ul>
+      <span class="category-card-cta">Open PHI workspace →</span>
+    </button>
+  </div>
+</section>
+
+<!-- Workspace: shown after category selection -->
+<div id="view-workspace" class="view" hidden>
+  <div class="workspace-bar">
+    <button type="button" id="back-home-btn" class="back-btn">← Home</button>
+    <div class="workspace-title">
+      <span id="workspace-category-pill" class="category-pill pii">PII</span>
+      <span id="workspace-title-text">PII workspace</span>
+    </div>
+  </div>
+
+  <nav id="sub-nav" class="sub-nav" aria-label="Workspace tools"></nav>
+
+  <main class="workspace-main">
+    <!-- PII panels -->
+    <section id="pii-predict" class="panel" data-category="pii" data-panel="predict">
+      <h2>Detect PII</h2>
+      <p class="hint"><code>POST /predict</code> — local RoBERTa model with confidence scores.</p>
+      <textarea id="predict-text" placeholder="e.g. John Smith, john@example.com, SSN 123-45-6789"></textarea>
+      <div class="controls">
+        <label class="slider-label">Min confidence
+          <input type="range" id="predict-confidence" min="0" max="1" step="0.05" value="0" />
+          <span id="predict-confidence-val">0.00</span>
+        </label>
+        <button id="predict-btn" type="button">Run detection</button>
+      </div>
+      <div id="predict-result" class="result"></div>
+    </section>
+
+    <section id="pii-validate" class="panel" data-category="pii" data-panel="validate">
+      <h2>Validate PII</h2>
+      <p class="hint"><code>POST /validate</code> — compliance pass/fail before storing or forwarding text.</p>
+      <textarea id="validate-text" placeholder="Paste text to validate…"></textarea>
+      <p class="label">Filter by type (optional):</p>
+      <div id="validate-entity-filter" class="chip-select"></div>
+      <div class="controls"><button id="validate-btn" type="button">Run validation</button></div>
+      <div id="validate-result" class="result"></div>
+    </section>
+
+    <section id="pii-mask" class="panel" data-category="pii" data-panel="mask">
+      <h2>Mask PII</h2>
+      <p class="hint"><code>POST /mask</code> — redact detected spans.</p>
+      <textarea id="mask-text" placeholder="Paste text to mask…"></textarea>
+      <div class="controls">
+        <label>Style
+          <select id="mask-style">
+            <option value="type">[TYPE]</option>
+            <option value="asterisk">****</option>
+            <option value="placeholder">&lt;REDACTED&gt;</option>
+            <option value="ignore">Ignore</option>
+            <option value="anonymize">Anonymize</option>
+          </select>
+        </label>
+        <button id="mask-btn" type="button">Mask text</button>
+      </div>
+      <div id="mask-result" class="result"></div>
+    </section>
+
+    <section id="pii-batch" class="panel" data-category="pii" data-panel="batch">
+      <h2>Batch PII</h2>
+      <p class="hint"><code>POST /predict/batch</code> — one line per text (max 50).</p>
+      <textarea id="batch-text" placeholder="Line 1&#10;Line 2&#10;Line 3"></textarea>
+      <div class="controls"><button id="batch-btn" type="button">Run batch</button></div>
+      <div id="batch-result" class="result"></div>
+    </section>
+
+    <section id="pii-anonymize" class="panel" data-category="pii" data-panel="anonymize">
+      <h2>Anonymize &amp; save tokens</h2>
+      <p class="hint"><code>POST /api/v1/anonymize</code> — middleware applies policies and stores mappings.</p>
+      <textarea id="anonymize-text" placeholder="John Doe, doctor@clinic.com, SSN 999-12-3456"></textarea>
+      <div class="controls preset-row">
+        <label>Policy preset
+          <select id="anonymize-preset-select">
+            <option value="">— None —</option>
+            <option value="hipaa">HIPAA</option>
+            <option value="gdpr">GDPR</option>
+            <option value="pci">PCI DSS</option>
+            <option value="minimal">Minimal</option>
+            <option value="anonymize_all">Anonymize all</option>
+            <option value="redact_all">Redact all</option>
+          </select>
+        </label>
+      </div>
+      <div class="controls">
+        <button id="anonymize-btn" type="button">Anonymize</button>
+        <button id="nav-tokens-btn" type="button" class="secondary-btn">Token Explorer ↗</button>
+      </div>
+      <div id="anonymize-result" class="result"></div>
+    </section>
+
+    <section id="pii-entities" class="panel" data-category="pii" data-panel="entities">
+      <h2>PII entity types</h2>
+      <p class="hint"><code>GET /entities</code> — labels supported by the RoBERTa model.</p>
+      <div id="entities-result" class="result"></div>
+    </section>
+
+    <!-- PHI panels -->
+    <section id="phi-predict" class="panel" data-category="phi" data-panel="predict">
+      <h2>Detect PHI</h2>
+      <p class="hint"><code>POST /phi/predict</code> — OpenAI backend (local model later).</p>
+      <textarea id="phi-predict-text" placeholder="Patient Jane Doe (MRN 998877) diagnosed with Type 2 diabetes, prescribed metformin 500mg."></textarea>
+      <div class="controls">
+        <label class="slider-label">Min confidence
+          <input type="range" id="phi-predict-confidence" min="0" max="1" step="0.05" value="0" />
+          <span id="phi-predict-confidence-val">0.00</span>
+        </label>
+        <button id="phi-predict-btn" type="button">Run detection</button>
+      </div>
+      <div id="phi-predict-result" class="result"></div>
+    </section>
+
+    <section id="phi-validate" class="panel" data-category="phi" data-panel="validate">
+      <h2>Validate PHI</h2>
+      <p class="hint"><code>POST /phi/validate</code> — check for Protected Health Information.</p>
+      <textarea id="phi-validate-text" placeholder="Paste clinical / healthcare text…"></textarea>
+      <p class="label">Filter by label (optional):</p>
+      <div id="phi-validate-entity-filter" class="chip-select"></div>
+      <div class="controls"><button id="phi-validate-btn" type="button">Run validation</button></div>
+      <div id="phi-validate-result" class="result"></div>
+    </section>
+
+    <section id="phi-mask" class="panel" data-category="phi" data-panel="mask">
+      <h2>Mask PHI</h2>
+      <p class="hint"><code>POST /phi/mask</code> — redact detected PHI spans.</p>
+      <textarea id="phi-mask-text" placeholder="Paste clinical text to redact…"></textarea>
+      <div class="controls">
+        <label>Style
+          <select id="phi-mask-style">
+            <option value="type">[TYPE]</option>
+            <option value="asterisk">****</option>
+            <option value="placeholder">&lt;REDACTED&gt;</option>
+            <option value="ignore">Ignore</option>
+          </select>
+        </label>
+        <button id="phi-mask-btn" type="button">Mask text</button>
+      </div>
+      <div id="phi-mask-result" class="result"></div>
+    </section>
+
+    <section id="phi-batch" class="panel" data-category="phi" data-panel="batch">
+      <h2>Batch PHI</h2>
+      <p class="hint"><code>POST /phi/predict/batch</code> — one clinical note per line (max 50).</p>
+      <textarea id="phi-batch-text" placeholder="Patient Jane Doe, MRN 12345&#10;Prescribed metformin for diabetes"></textarea>
+      <div class="controls"><button id="phi-batch-btn" type="button">Run batch</button></div>
+      <div id="phi-batch-result" class="result"></div>
+    </section>
+
+    <section id="phi-anonymize" class="panel" data-category="phi" data-panel="anonymize">
+      <h2>Anonymize PHI</h2>
+      <p class="hint"><code>POST /phi/anonymize</code> — detect and redact PHI with mapping preview.</p>
+      <textarea id="phi-anonymize-text" placeholder="Patient Jane Doe (MRN 998877), diagnosis: Type 2 diabetes"></textarea>
+      <div class="controls">
+        <button id="phi-anonymize-btn" type="button">Anonymize</button>
+        <button id="phi-nav-tokens-btn" type="button" class="secondary-btn">Token Explorer ↗</button>
+      </div>
+      <div id="phi-anonymize-result" class="result"></div>
+    </section>
+
+    <section id="phi-entities" class="panel" data-category="phi" data-panel="entities">
+      <h2>PHI entity labels</h2>
+      <p class="hint"><code>GET /phi/entities</code> — HIPAA + clinical labels with display names.</p>
+      <div id="phi-entities-result" class="result"></div>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <span id="api-info">Loading service info…</span>
+</footer>
+
+<script src="/app.js?v=9"></script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+type Query {
+    getStudy(studyId: String!): Study
+    getAccountStudy(accountId: String!): [Study]
+    getStudySearch(searchStr: String!): [Study]
+    getStudysOfSite(siteId: String!): [Study]
+    getStudyEvent(studyId: String!, eventType: String!): [StudyEvent]
+    getStudyContact(studyId: String!): [StudyContact]
+    getStudySite(studyId: String!): [StudySite]
+    getStudySiteContact(studyId: String!, siteId: String!): [StudySiteContact]
+    getStudyArms(studyId: String!): [StudyArms]
+    getStudyArmsWithDetails(armNum: String!): StudyArmWithDetails
+    getStudySiteAdverseEvents(studyId: String, siteId: String): [StudySitePatientAdverseEvents]
+    getStudyAdverseEvents(studyId: String): [StudySitePatientAdverseEvents]
+    searchStudySiteQuery(queryId: String, queryNum: String, studyId: String, siteId: String, statuses: String, assignedTo: String): [StudySiteQuery]
+    getScheduleDetails(studyId: String, scheduleId: String): StudyScheduleOut
+}
+
+type Mutation {
+    createStudy(studyNumber: String, parentAccountId: String, studyTitle: String, nameofIMP: String, devPhase: String, status: String, primaryEndPoint: String, secondaryEndPoint: String, expEndPoint: String, startDt: String, endDt: String, studyDuration: String, stoppingCriteria: String, numberOfSitesPlanned: String, numberOfSubPlanned: String, route: String, regiman: String, dosage: String, statMethod: String, interimAnalysis: String, studyFlow: String, protocolNumber: String, studyStatus: String, studyType: String, studyPhase: String, sponsorType: String, indication: String, therapeuticArea: String): ApiResponse
+    updateStudy(studyId: String, studyNumber: String, studyTitle: String, nameofIMP: String, devPhase: String, status: String, primaryEndPoint: String, secondaryEndPoint: String, expEndPoint: String, startDt: String, endDt: String, stoppingCriteria: String, indication: String, therapeuticArea: String): ApiResponse
+    addStudySite(studyId: String!, siteId: String!, siteName: String, siteUserId: String, status: String, onboardStatus: String, limitization: String, pContact: String, role: String, impReceived: String, placeholder: String): ApiResponse
+    addStudySiteContact(studyId: String!, siteId: String!, contactId: String!, role: String, primaryContactInd: String): ApiResponse
+    addStudyArm(armName: String, studyId: String, type: String, description: String, status: String): ApiResponse
+    createStudyEvent(studyId: String, eventType: String, type: String, description: String, severity: String, status: String, effectiveDate: String): ApiResponse
+    createStudySitePatientAdverseEvents(studyId: String, siteId: String, patientId: String, aeTerm: String, severity: String, causality: String, outcome: String, startDate: String, stopDate: String, summary: String): ApiResponse
+    updateStudySitePatientAdverseEvents(adverseEventId: String, studyId: String, siteId: String, patientId: String, aeTerm: String, severity: String, causality: String, outcome: String, startDate: String, stopDate: String, summary: String): ApiResponse
+    deletePatientAdverseEvents(adverseEventId: String): ApiResponse
+    addStudySiteQuery(studyId: String, studyName: String, siteId: String, queryTitle: String, queryDescription: String, category: String, severity: String, assignedTo: String, assignedToName: String, sponsorReference1: String, sponsorReference2: String): ApiResponse
+    resolveStudySiteQuery(queryId: String): ApiResponse
+}
+
+type ApiResponse {
+    code: Int
+    type: String
+    message: String
+    data: String
+}
+
+type Study {
+    id: ID
+    studyId: String
+    studyNumber: String
+    protocolNumber: String
+    parentAccountId: String
+    studyTitle: String
+    nameOfIMP: String
+    devPhase: String
+    status: String
+    primaryEndPoint: String
+    secondaryEndPoint: String
+    expEndPoint: String
+    startDt: String
+    endDt: String
+    studyDuration: String
+    stoppingCriteria: String
+    numberOfSitesPlanned: String
+    numberOfSubPlanned: String
+    route: String
+    regiman: String
+    dosage: String
+    statMethod: String
+    interimAnalysis: String
+    studyFlow: String
+    studyStatus: String
+    studyType: String
+    studyPhase: String
+    sponsorType: String
+    indication: String
+    therapeuticArea: String
+}
+
+type StudySite {
+    id: ID
+    studyId: String
+    siteId: String
+    siteName: String
+    siteUserId: String
+    status: String
+    onboardStatus: String
+    limitization: String
+    primaryContact: String
+    role: String
+    impReceived: String
+    placeholder: String
+}
+
+type StudySiteContact {
+    id: ID
+    studyId: String
+    siteId: String
+    contactId: String
+    role: String
+    primaryContactInd: String
+}
+
+type StudyArms {
+    id: ID
+    armNum: String
+    studyId: String
+    armName: String
+    armType: String
+    description: String
+    status: String
+}
+
+type StudyArmDetails {
+    id: ID
+    armNum: String
+    dosageName: String
+    dosage: String
+    strength: String
+    unit: String
+    route: String
+    frequency: String
+    description: String
+}
+
+type StudyArmWithDetails {
+    arm: StudyArms
+    details: [StudyArmDetails]
+}
+
+type StudyEvent {
+    id: ID
+    eventId: String
+    studyId: String
+    eventType: String
+    subType: String
+    description: String
+    severity: String
+    status: String
+    effectiveDate: String
+}
+
+type StudyContact {
+    id: ID
+    studyId: String
+    contactId: String
+    role: String
+}
+
+type StudySitePatientAdverseEvents {
+    id: ID
+    adverseEventId: String
+    studyId: String
+    siteId: String
+    patientId: String
+    aeTerm: String
+    severity: String
+    causality: String
+    outcome: String
+    startDate: String
+    stopDate: String
+    summary: String
+}
+
+type StudySiteQuery {
+    id: ID
+    queryId: String
+    queryNum: String
+    studyId: String
+    studyName: String
+    siteId: String
+    queryTitle: String
+    queryDescription: String
+    category: String
+    severity: String
+    status: String
+    assignedTo: String
+    assignedToName: String
+    sponsorReference1: String
+    sponsorReference2: String
+    siteReference1: String
+    siteReference2: String
+    createdByName: String
+    queryResponse: String
+}
+
+type StudyScheduleOut {
+    studyId: String
+    schedule: StudySchedule
+    segments: [StudyScheduleSegment]
+    events: [StudyScheduleEvent]
+}
+
+type StudySchedule {
+    id: ID
+    scheduleId: String
+    studyId: String
+    scheduleName: String
+    status: String
+}
+
+type StudyScheduleSegment {
+    id: ID
+    scheduleId: String
+    segmentId: String
+    segmentName: String
+    segmentOrder: Int
+}
+
+type StudyScheduleEvent {
+    id: ID
+    scheduleId: String
+    eventId: String
+    eventName: String
+    segmentId: String
+    rowNum: Int
+    colNum: Int
+}

@@ -1,0 +1,60 @@
+{
+  "family": "privacy-detection-service",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "2048",
+  "memory": "4096",
+  "executionRoleArn": "arn:aws:iam::123456789012:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::123456789012:role/privacyDetectionTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "privacy-detection-service",
+      "image": "123456789012.dkr.ecr.us-east-1.amazonaws.com/privacy-detection-service:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "hostPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        { "name": "ENVIRONMENT", "value": "production" },
+        { "name": "SERVICE_NAME", "value": "privacy-detection-service" },
+        { "name": "SERVICE_PORT", "value": "8080" },
+        { "name": "SERVICE_HOST", "value": "0.0.0.0" },
+        { "name": "CUSTOM_DOMAIN", "value": "https://pii-phi.hekma.ai" },
+        { "name": "STORAGE_BACKEND", "value": "postgresql" },
+        { "name": "AWS_REGION", "value": "us-east-1" },
+        { "name": "LOG_LEVEL", "value": "INFO" },
+        { "name": "PHI_DETECTOR_BACKEND", "value": "openai" },
+        { "name": "OPENAI_PHI_MODEL", "value": "gpt-4o-mini" }
+      ],
+      "secrets": [
+        {
+          "name": "DATABASE_URL",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:123456789012:secret:privacy-detection/db-url"
+        },
+        {
+          "name": "OPENAI_API_KEY",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:123456789012:secret:openai/api-key"
+        }
+      ],
+      "healthCheck": {
+        "command": ["CMD-SHELL", "curl -f http://localhost:8080/ready || exit 1"],
+        "interval": 15,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 30
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/privacy-detection-service",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "fargate"
+        }
+      }
+    }
+  ]
+}

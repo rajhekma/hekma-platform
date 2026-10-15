@@ -1,0 +1,1087 @@
+{
+  "info": {
+    "name": "Hekma CTMS Service API",
+    "description": "Clinical trial protocols, study sites, queries, adverse events, and EDC webhooks.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Clinical Studies",
+      "item": [
+        {
+          "name": "1. Create Study Protocol",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{ctms_base_url}}/api/v1/studies",
+              "host": [
+                "{{ctms_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "studies"
+              ],
+              "query": []
+            },
+            "description": "Creates a clinical study protocol under the caller's tenant subtree.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studyNumber\": \"ST-2026-001\",\n  \"protocolNumber\": \"PROTO-ONC-01\",\n  \"studyTitle\": \"Phase III Oncology Targeted Therapy\",\n  \"nameOfImp\": \"HKM-2026\",\n  \"devPhase\": \"Phase 3\",\n  \"primaryEndPoint\": \"Overall Survival (OS) at 24 months\",\n  \"secondaryEndPoint\": \"Progression-Free Survival (PFS)\",\n  \"startDate\": \"2026-11-01\",\n  \"endDate\": \"2028-11-01\",\n  \"studyStatus\": \"ACTIVE\",\n  \"studyType\": \"INTERVENTIONAL\",\n  \"indication\": \"Advanced Solid Tumors\",\n  \"therapeuticArea\": \"Oncology\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.studyId) {",
+                  "    pm.environment.set(\"study_id\", jsonData.data.studyId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. List Studies",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{ctms_base_url}}/api/v1/studies",
+              "host": [
+                "{{ctms_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "studies"
+              ],
+              "query": []
+            },
+            "description": "Lists studies accessible to caller's tenant subtree."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Get Study Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{ctms_base_url}}/api/v1/studies/{{study_id}}",
+              "host": [
+                "{{ctms_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "studies",
+                "{{study_id}}"
+              ],
+              "query": []
+            },
+            "description": "Fetches comprehensive study protocol details."
+          },
+          "response": []
+        },
+        {
+          "name": "4. Update Study",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{ctms_base_url}}/api/v1/studies/{{study_id}}",
+              "host": [
+                "{{ctms_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "studies",
+                "{{study_id}}"
+              ],
+              "query": []
+            },
+            "description": "Updates study metadata and endpoints.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studyTitle\": \"Phase III Oncology Targeted Therapy - Revised\",\n  \"studyStatus\": \"ACTIVE\",\n  \"primaryEndPoint\": \"Overall Survival (OS) at 36 months\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5. Search Studies",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{ctms_base_url}}/api/v1/studies/search?q=Oncology",
+              "host": [
+                "{{ctms_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "studies",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "Oncology"
+                }
+              ]
+            },
+            "description": "Searches studies by title, protocol number, or therapeutic area."
+          },
+          "response": []
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "Study Sites",
+      "item": [
+        {
+          "name": "1. Allocate Site to Study",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{ctms_base_url}}/api/v1/studies/{{study_id}}/sites",
+              "host": [
+                "{{ctms_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "studies",
+                "{{study_id}}",
+                "sites"
+              ],
+              "query": []
+            },
+            "description": "Allocates clinical site to study.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"siteNumber\": \"SITE-101\",\n  \"siteName\": \"Mayo Clinic Rochester\",\n  \"siteStatus\": \"ACTIVE\",\n  \"principalInvestigator\": \"Dr. Sarah Jenkins\",\n  \"targetPatients\": 50\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.siteId) {",
+                  "    pm.environment.set(\"site_id\", jsonData.data.siteId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. List Study Sites",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{ctms_base_url}}/api/v1/studies/{{study_id}}/sites",
+              "host": [
+                "{{ctms_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "studies",
+                "{{study_id}}",
+                "sites"
+              ],
+              "query": []
+            },
+            "description": "Lists all sites allocated to study."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Get Site Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{ctms_base_url}}/api/v1/studies/{{study_id}}/sites/{{site_id}}",
+              "host": [
+                "{{ctms_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "studies",
+                "{{study_id}}",
+                "sites",
+                "{{site_id}}"
+              ],
+              "query": []
+            },
+            "description": "Returns details for specific study site."
+          },
+          "response": []
+        },
+        {
+          "name": "4. Update Study Site",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{ctms_base_url}}/api/v1/studies/{{study_id}}/sites/{{site_id}}",
+              "host": [
+                "{{ctms_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "studies",
+                "{{study_id}}",
+                "sites",
+                "{{site_id}}"
+              ],
+              "query": []
+            },
+            "description": "Updates site status and target recruitment numbers.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"siteStatus\": \"ENROLLING\",\n  \"targetPatients\": 75\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5. Get Site Contacts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{ctms_base_url}}/api/v1/studies/{{study_id}}/sites/{{site_id}}/contacts",
+              "host": [
+                "{{ctms_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "studies",
+                "{{study_id}}",
+                "sites",
+                "{{site_id}}",
+                "contacts"
+              ],
+              "query": []
+            },
+            "description": "Returns investigator contacts and coordinators assigned to site."
+          },
+          "response": []
+        },
+        {
+          "name": "6. Get Site Monitoring Notes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{ctms_base_url}}/api/v1/studies/{{study_id}}/sites/{{site_id}}/notes",
+              "host": [
+                "{{ctms_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "studies",
+                "{{study_id}}",
+                "sites",
+                "{{site_id}}",
+                "notes"
+              ],
+              "query": []
+            },
+            "description": "Returns CRA and monitoring notes recorded for site."
+          },
+          "response": []
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "Clinical Queries",
+      "item": [
+        {
+          "name": "1. Raise Study Site Query",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{ctms_base_url}}/api/v1/studies/{{study_id}}/sites/{{site_id}}/queries",
+              "host": [
+                "{{ctms_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "studies",
+                "{{study_id}}",
+                "sites",
+                "{{site_id}}",
+                "queries"
+              ],
+              "query": []
+            },
+            "description": "Raises clinical data query for investigator resolution.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": \"PT-0091\",\n  \"queryText\": \"Blood pressure value 210/120 mmHg outside expected range. Please verify source doc.\",\n  \"queryStatus\": \"OPEN\",\n  \"severity\": \"HIGH\",\n  \"category\": \"DATA_VALIDATION\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.queryId) {",
+                  "    pm.environment.set(\"query_id\", jsonData.data.queryId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. List Study Site Queries",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{ctms_base_url}}/api/v1/studies/{{study_id}}/sites/{{site_id}}/queries",
+              "host": [
+                "{{ctms_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "studies",
+                "{{study_id}}",
+                "sites",
+                "{{site_id}}",
+                "queries"
+              ],
+              "query": []
+            },
+            "description": "Lists all open and resolved queries for site."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Resolve Query",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{ctms_base_url}}/api/v1/studies/queries/{{query_id}}/resolve",
+              "host": [
+                "{{ctms_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "studies",
+                "queries",
+                "{{query_id}}",
+                "resolve"
+              ],
+              "query": []
+            },
+            "description": "Marks clinical query as resolved."
+          },
+          "response": []
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "Adverse Events",
+      "item": [
+        {
+          "name": "1. Log Adverse Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{ctms_base_url}}/api/v1/studies/{{study_id}}/sites/{{site_id}}/adverse-events",
+              "host": [
+                "{{ctms_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "studies",
+                "{{study_id}}",
+                "sites",
+                "{{site_id}}",
+                "adverse-events"
+              ],
+              "query": []
+            },
+            "description": "Logs patient adverse event during clinical trial.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": \"PT-0091\",\n  \"adverseEventTerm\": \"Grade 2 Nausea\",\n  \"severity\": \"MODERATE\",\n  \"isSerious\": false,\n  \"startDate\": \"2026-10-12\",\n  \"relationshipToImp\": \"POSSIBLE\",\n  \"actionTaken\": \"DOSE_REDUCED\",\n  \"outcome\": \"RESOLVING\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.aeId) {",
+                  "    pm.environment.set(\"ae_id\", jsonData.data.aeId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. List Adverse Events for Study",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{ctms_base_url}}/api/v1/studies/{{study_id}}/adverse-events",
+              "host": [
+                "{{ctms_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "studies",
+                "{{study_id}}",
+                "adverse-events"
+              ],
+              "query": []
+            },
+            "description": "Lists all adverse events across all sites for a study."
+          },
+          "response": []
+        },
+        {
+          "name": "3. List Adverse Events for Site",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{ctms_base_url}}/api/v1/studies/{{study_id}}/sites/{{site_id}}/adverse-events",
+              "host": [
+                "{{ctms_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "studies",
+                "{{study_id}}",
+                "sites",
+                "{{site_id}}",
+                "adverse-events"
+              ],
+              "query": []
+            },
+            "description": "Lists adverse events recorded at a specific site."
+          },
+          "response": []
+        },
+        {
+          "name": "4. Get Adverse Event Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{ctms_base_url}}/api/v1/studies/adverse-events/{{ae_id}}",
+              "host": [
+                "{{ctms_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "studies",
+                "adverse-events",
+                "{{ae_id}}"
+              ],
+              "query": []
+            },
+            "description": "Retrieves full adverse event record."
+          },
+          "response": []
+        },
+        {
+          "name": "5. Update Adverse Event",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{ctms_base_url}}/api/v1/studies/adverse-events/{{ae_id}}",
+              "host": [
+                "{{ctms_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "studies",
+                "adverse-events",
+                "{{ae_id}}"
+              ],
+              "query": []
+            },
+            "description": "Updates adverse event status, outcome or dates.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"outcome\": \"RECOVERED\",\n  \"endDate\": \"2026-10-14\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6. Soft-Delete Adverse Event",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{ctms_base_url}}/api/v1/studies/adverse-events/{{ae_id}}",
+              "host": [
+                "{{ctms_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "studies",
+                "adverse-events",
+                "{{ae_id}}"
+              ],
+              "query": []
+            },
+            "description": "Soft deletes erroneous adverse event record."
+          },
+          "response": []
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "EDC Webhooks",
+      "item": [
+        {
+          "name": "1. Generate EDC Webhook Keys",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{ctms_base_url}}/webhook/cmts/generate-keys?studyId={{study_id}}&siteId={{site_id}}&createdBy=admin",
+              "host": [
+                "{{ctms_base_url}}"
+              ],
+              "path": [
+                "webhook",
+                "cmts",
+                "generate-keys"
+              ],
+              "query": [
+                {
+                  "key": "studyId",
+                  "value": "{{study_id}}"
+                },
+                {
+                  "key": "siteId",
+                  "value": "{{site_id}}"
+                },
+                {
+                  "key": "createdBy",
+                  "value": "admin"
+                }
+              ]
+            },
+            "description": "Generates access key and secret key for external EDC ingestion."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data) {",
+                  "    if (jsonData.data.accessKey) pm.environment.set(\"edc_access_key\", jsonData.data.accessKey);",
+                  "    if (jsonData.data.secretKey) pm.environment.set(\"edc_secret_key\", jsonData.data.secretKey);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Ingest EDC Webhook Payload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Access-Key",
+                "value": "{{edc_access_key}}",
+                "type": "text"
+              },
+              {
+                "key": "X-Secret-Key",
+                "value": "{{edc_secret_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{ctms_base_url}}/webhook/cmts",
+              "host": [
+                "{{ctms_base_url}}"
+              ],
+              "path": [
+                "webhook",
+                "cmts"
+              ],
+              "query": []
+            },
+            "description": "Ingests EDC clinical trial events using HMAC access credentials.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resourceType\": \"ADVERSE_EVENTS\",\n  \"studyId\": \"{{study_id}}\",\n  \"siteId\": \"{{site_id}}\",\n  \"patientId\": \"PT-0091\",\n  \"payload\": \"{\\\"event\\\": \\\"Rash\\\", \\\"grade\\\": 1}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3. Load EDC Bound Resource Data",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Access-Key",
+                "value": "{{edc_access_key}}",
+                "type": "text"
+              },
+              {
+                "key": "X-Secret-Key",
+                "value": "{{edc_secret_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{ctms_base_url}}/api/v1/webhook/cmts/load_data?resourceType=STUDY_EVENT&studyId={{study_id}}&siteId={{site_id}}",
+              "host": [
+                "{{ctms_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "webhook",
+                "cmts",
+                "load_data"
+              ],
+              "query": [
+                {
+                  "key": "resourceType",
+                  "value": "STUDY_EVENT"
+                },
+                {
+                  "key": "studyId",
+                  "value": "{{study_id}}"
+                },
+                {
+                  "key": "siteId",
+                  "value": "{{site_id}}"
+                }
+              ]
+            },
+            "description": "Fetches resource data for bound EDC client credentials."
+          },
+          "response": []
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "GraphQL",
+      "item": [
+        {
+          "name": "1. Query Study Details (GraphQL)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{ctms_base_url}}/graphql",
+              "host": [
+                "{{ctms_base_url}}"
+              ],
+              "path": [
+                "graphql"
+              ],
+              "query": []
+            },
+            "description": "GraphQL query fetching study protocol details.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query GetStudy($studyId: String!) { getStudy(studyId: $studyId) { studyId studyNumber studyTitle studyStatus therapeuticArea } }\",\n  \"variables\": {\n    \"studyId\": \"{{study_id}}\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2. Query Site Adverse Events (GraphQL)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{ctms_base_url}}/graphql",
+              "host": [
+                "{{ctms_base_url}}"
+              ],
+              "path": [
+                "graphql"
+              ],
+              "query": []
+            },
+            "description": "GraphQL query fetching site adverse event records.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query GetStudySiteAEs($studyId: String, $siteId: String) { getStudySiteAdverseEvents(studyId: $studyId, siteId: $siteId) { studyId siteId patientId adverseEventTerm severity } }\",\n  \"variables\": {\n    \"studyId\": \"{{study_id}}\",\n    \"siteId\": \"{{site_id}}\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": ""
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: hekma-notification-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/hekma_platform}
+    username: ${SPRING_DATASOURCE_USERNAME:admin}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    table: ${FLYWAY_TABLE:notification_flyway_schema_history}
+    baseline-on-migrate: true
+    baseline-version: 0
+
+  mail:
+    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:bareet.dev@gmail.com}
+    password: ${SPRING_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operationsSorter: method
+    tagsSorter: alpha
+    tryItOutEnabled: true
+    displayRequestDuration: true
+
+hekma:
+  security:
+    service-api-key: ${HEKMA_SERVICE_API_KEY:13f8fc11-b3b5-4a9e-ab49-06e96a57f42b}
+  notification:
+    channels:
+      email:
+        provider: ${EMAIL_PROVIDER:sendgrid} # Default email delivery via SendGrid v3 API
+        default-sender: ${EMAIL_DEFAULT_SENDER:support@hekma.ai}
+        sendgrid:
+          api-key: ${SENDGRID_API_KEY:}
+      sms:
+        provider: ${SMS_PROVIDER:mock}
+        twilio:
+          account-sid: ${TWILIO_ACCOUNT_SID:}
+          auth-token: ${TWILIO_AUTH_TOKEN:}
+          from-number: ${TWILIO_FROM_NUMBER:}
+      push:
+        provider: ${PUSH_PROVIDER:mock}
+        firebase-credentials-path: ${FIREBASE_CREDENTIALS_PATH:}
+    support:
+      otp:
+        pepper: ${SUPPORT_OTP_PEPPER:hekma-otp-default-pepper-2026}
+        ttl-seconds: ${SUPPORT_OTP_TTL_SECONDS:600}
+        max-attempts: ${SUPPORT_OTP_MAX_ATTEMPTS:5}
+        lock-ttl-seconds: ${SUPPORT_OTP_LOCK_TTL_SECONDS:1800}
+        resend-cooldown-seconds: ${SUPPORT_OTP_RESEND_COOLDOWN_SECONDS:60}
+        session-ttl-seconds: ${SUPPORT_SESSION_TTL_SECONDS:1800}
+      attachment:
+        max-size-bytes: ${SUPPORT_ATTACHMENT_MAX_SIZE_BYTES:10485760} # 10MB
+        max-count: ${SUPPORT_ATTACHMENT_MAX_COUNT:5}
+        storage-provider: ${SUPPORT_STORAGE_PROVIDER:mock} # 'mock' or 's3'
+        s3:
+          bucket: ${SUPPORT_S3_BUCKET:hekma-support-attachments}
+          region: ${SUPPORT_S3_REGION:us-east-1}
+          base-url: ${SUPPORT_S3_BASE_URL:https://hekma-support-attachments.s3.amazonaws.com}
+      sla:
+        default-hours: ${SUPPORT_SLA_HOURS:24}
+      jwt:
+        secret: ${JWT_SECRET:Graphql}
+
+logging:
+  pattern:
+    level: "%5p [traceId=%X{traceId:-}]"
+
+

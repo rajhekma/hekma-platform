@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: hekma-ctms-service-test
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    open-in-view: false
+  flyway:
+    enabled: false
+
+  graphql:
+    graphiql:
+      enabled: false
+
+app:
+  identity-service:
+    url: http://localhost:8080
+    service-key: test-service-key
+    cache-ttl-seconds: 60
+  security:
+    cors:
+      allowed-origins: http://localhost:3000
+    expose-api-docs: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true

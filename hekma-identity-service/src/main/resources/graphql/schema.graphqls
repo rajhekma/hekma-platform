@@ -1,0 +1,120 @@
+"""
+Roles available across the Hekma platform
+"""
+enum Role {
+    SYSTEM_ADMIN
+    ADMIN
+    SPONSOR
+    SITE
+    PATIENT
+}
+
+"""
+Lifecycle and activation status of a platform user
+"""
+enum UserStatus {
+    ACTIVE
+    INACTIVE
+    SUSPENDED
+    PENDING
+    PENDING_VERIFICATION
+}
+
+"""
+Verification mode through which OTP was dispatched and verified
+"""
+enum VerificationMode {
+    PHONE
+    EMAIL
+}
+
+"""
+Clinical participant consent tracking and demographic information
+"""
+type PatientDetail {
+    id: ID!
+    firstName: String!
+    lastName: String!
+    phoneNumber: String
+    invitationCode: String
+    termsAccepted: Boolean!
+    privacyPolicyAccepted: Boolean!
+    healthDataConsentAccepted: Boolean!
+    consentedAt: String!
+    createdAt: String!
+    updatedAt: String!
+    createdBy: String
+    updatedBy: String
+    version: Int
+}
+
+"""
+Hekma Platform User entity representing all participant types
+"""
+type User {
+    id: ID!
+    firebaseUid: String!
+    email: String
+    role: Role!
+    displayName: String
+    phoneNumber: String
+    status: UserStatus!
+    isActive: Boolean!
+    isDeleted: Boolean!
+    phoneVerified: Boolean!
+    emailVerified: Boolean!
+    twoFactorEnabled: Boolean!
+    verificationMode: VerificationMode
+    createdAt: String!
+    updatedAt: String!
+    createdBy: String
+    updatedBy: String
+    version: Int
+    patientDetails: PatientDetail
+}
+
+"""
+Root queries for System Administration and platform user retrieval
+"""
+type Query {
+    """
+    Retrieve all users across the platform, optionally filtered by user role.
+    If 'role' is omitted or null, returns all users regardless of role (SYSTEM_ADMIN, ADMIN, SPONSOR, SITE, PATIENT).
+    """
+    users(role: Role): [User!]!
+
+    """
+    Retrieve a specific user by database UUID.
+    """
+    userById(id: ID!): User
+
+    """
+    Retrieve a specific user by email address.
+    """
+    userByEmail(email: String!): User
+
+    """
+    Count users across the platform, optionally filtered by role.
+    """
+    userCount(role: Role): Int!
+}
+
+"""
+Root mutations for user management operations
+"""
+type Mutation {
+    """
+    Update user active/inactive status enforcing role hierarchy
+    """
+    updateUserActiveStatus(userId: ID!, isActive: Boolean!): User!
+
+    """
+    Soft delete user profile enforcing role hierarchy
+    """
+    softDeleteUser(userId: ID!): Boolean!
+
+    """
+    Update two-factor authentication (2FA) setting for a user profile
+    """
+    updateUserTwoFactor(userId: ID!, twoFactorEnabled: Boolean!): User!
+}

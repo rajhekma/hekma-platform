@@ -1,0 +1,26 @@
+name: Trigger TrialGPT Deploy
+
+on:
+  push:
+    branches:
+      - develop
+      - trialgpt-api-v1
+
+jobs:
+  trigger:
+    runs-on: dev-k8s
+
+    steps:
+      - name: Send repository_dispatch to DevOps repo
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          repository: HekmaAI/devops  
+          event-type: trigger-trailgpt
+          client-payload: |
+            {
+              "repo_name": "${{ github.repository }}",
+              "commit": "${{ github.sha }}",
+              "version": "v${{ github.run_number }}",
+              "action": "both"
+            }

@@ -1,0 +1,85 @@
+name: Trigger Dev Deploy (pds-api + pds-agent)
+
+# Push to develop -> ask the devops repo to build + deploy both images to the dev cluster.
+# The actual build/push/helm-values-update logic lives in devops/.github/workflows/pds-api.yml
+# and pds-agent.yml (triggered here via repository_dispatch), matching the pattern used by
+# every other Hekma app repo (see devops/.github/workflows/hekma-backend-api.yml).
+
+on:
+  push:
+    branches: [develop]
+
+  workflow_dispatch:
+    inputs:
+      service:
+        description: 'Which service to dispatch'
+        required: true
+        default: both
+        type: choice
+        options:
+          - pds-api
+          - pds-agent
+          - both
+      action:
+        description: 'Action the devops workflow should perform'
+        required: true
+        default: both
+        type: choice
+        options:
+          - build
+          - deploy
+          - both
+      version:
+        description: 'Image tag (leave blank to use the short commit SHA)'
+        required: false
+        default: ''
+
+jobs:
+  dispatch-pds-api:
+    if: github.event_name == 'push' || inputs.service == 'pds-api' || inputs.service == 'both'
+    runs-on: dev-k8s
+    steps:
+      - name: Dispatch devops build+deploy for pds-api
+        env:
+          # Org secret is GITPAT; this repo also carries PERSONAL_ACCESS_TOKEN.
+          GITPAT: ${{ secrets.GITPAT || secrets.PERSONAL_ACCESS_TOKEN }}
+          ACTION: ${{ inputs.action || 'both' }}
+          VERSION_INPUT: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GITPAT}" ]; then
+            echo "::error::No GITPAT/PERSONAL_ACCESS_TOKEN available - cannot dispatch to HekmaAI/devops"
+            exit 1
+          fi
+          VERSION="${VERSION_INPUT:-${GITHUB_SHA::7}}"
+          curl -sS --fail-with-body -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            -H "Authorization: Bearer ${GITPAT}" \
+            https://api.github.com/repos/HekmaAI/devops/dispatches \
+            -d "{\"event_type\":\"trigger-pds-api\",\"client_payload\":{\"action\":\"${ACTION}\",\"version\":\"${VERSION}\"}}"
+          echo "Dispatched trigger-pds-api (action=${ACTION}, version=${VERSION})"
+
+  dispatch-pds-agent:
+    if: github.event_name == 'push' || inputs.service == 'pds-agent' || inputs.service == 'both'
+    runs-on: dev-k8s
+    steps:
+      - name: Dispatch devops build+deploy for pds-agent
+        env:
+          GITPAT: ${{ secrets.GITPAT || secrets.PERSONAL_ACCESS_TOKEN }}
+          ACTION: ${{ inputs.action || 'both' }}
+          VERSION_INPUT: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GITPAT}" ]; then
+            echo "::error::No GITPAT/PERSONAL_ACCESS_TOKEN available - cannot dispatch to HekmaAI/devops"
+            exit 1
+          fi
+          VERSION="${VERSION_INPUT:-${GITHUB_SHA::7}}"
+          curl -sS --fail-with-body -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            -H "Authorization: Bearer ${GITPAT}" \
+            https://api.github.com/repos/HekmaAI/devops/dispatches \
+            -d "{\"event_type\":\"trigger-pds-agent\",\"client_payload\":{\"action\":\"${ACTION}\",\"version\":\"${VERSION}\"}}"
+          echo "Dispatched trigger-pds-agent (action=${ACTION}, version=${VERSION})"

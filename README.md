@@ -32,7 +32,9 @@ Point existing monoliths at these hosts while you extract microservices:
 hekma-platform/
 ├── hekma-patient-health/ # S3: profile, EHR, FHIR, medications, account deletion
 ├── hekma-scanner/        # S4: clinical scan (MS-11) + EHR summary (MS-13)
-├── hekma-ai-usage/       # one service: src/api, src/service, src/repository
+├── hekma-trial-matching/ # S5: TrialGPT (copied from TrialGPT/trailgpt)
+├── hekma-phi-shield/     # S6: PHI/PII detection (copied from PHI_PII/PHI-PII)
+├── hekma-ai-usage/       # metering ledger (not subscriptions)
 ├── api-gateway/          # nginx routes (monolith → new services)
 ├── docker-compose.yml    # local Postgres, MySQL, Redis, LocalStack, gateway, AI usage
 ├── docs/                 # architecture & setup guides
@@ -46,6 +48,7 @@ Each business service is a `hekma-{service-name}/` folder with `Dockerfile`, `sr
 ## Docs
 
 **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) is the design to follow.**
+- **[docs/DEPLOYMENT_AND_COMMUNICATION.md](docs/DEPLOYMENT_AND_COMMUNICATION.md)** — how `hekma-*` services deploy and talk (HTTP, SQS, gateway)
 6 sellable products, 5 deployables. Do not build 16 microservices.
 
 - **[docs/SERVICE_DECOMPOSITION.md](docs/SERVICE_DECOMPOSITION.md)** — how many services and why: 6 + gateway
@@ -55,6 +58,10 @@ Each business service is a `hekma-{service-name}/` folder with `Dockerfile`, `sr
 - **[docs/TENANCY_DESIGN.md](docs/TENANCY_DESIGN.md)** — multi-org work, when you need it
 - **[docs/MONETIZATION_ROADMAP.md](docs/MONETIZATION_ROADMAP.md)** — subscriptions, metering, tenancy: roadmap for leadership
 - [docs/TENANCY_LEADERSHIP_OVERVIEW.md](docs/TENANCY_LEADERSHIP_OVERVIEW.md) — business-level, for leadership
+- [hekma-identity-service/docs/IDENTITY_SERVICE.md](hekma-identity-service/docs/IDENTITY_SERVICE.md) — S1 Identity (Auth, RBAC, Multi-tenancy, Custom Roles, Introspection)
+- [hekma-ctms-service/docs/CTMS_SERVICE.md](hekma-ctms-service/docs/CTMS_SERVICE.md) — S2 CTMS (Clinical study protocols, sites, events, adverse events)
+- [hekma-appointment-service/docs/APPOINTMENT_SERVICE.md](hekma-appointment-service/docs/APPOINTMENT_SERVICE.md) — Appointment (Scheduling, calendar conflict detection, reminders)
+- [hekma-notification-service/docs/NOTIFICATION_SERVICE.md](hekma-notification-service/docs/NOTIFICATION_SERVICE.md) — Notification & Support (Email, SMS, Push, In-App, Support Desk)
 - [hekma-patient-health/README.md](hekma-patient-health/README.md) — S3 Patient Health (profile, EHR, FHIR, meds, deletion)
 - [hekma-scanner/docs/SCANNER.md](hekma-scanner/docs/SCANNER.md) — S4 Clinical AI (scan + EHR summary)
 - [hekma-ai-usage/docs/AI_USAGE.md](hekma-ai-usage/docs/AI_USAGE.md) — AI Usage: components, APIs, and diagrams
@@ -69,7 +76,7 @@ Each business service is a `hekma-{service-name}/` folder with `Dockerfile`, `sr
 | Repo | Role |
 |------|------|
 | `hekma_api` | Java monolith (extract 7 services) |
-| `hekma_data_pipleline` | Python monolith (extract 7 services) |
-| `TrialGPT/trailgpt` | MS-15 Trial Platform |
-| `PHI_PII/PHI-PII` | MS-16 PHI/PII |
+| `hekma_data_pipleline` | Python monolith (strangler) |
+| `TrialGPT/trailgpt` | Source for `hekma-trial-matching` (also copied in platform) |
+| `PHI_PII/PHI-PII` | Source for `hekma-phi-shield` (also copied in platform) |
 | `hekma_test_suit` | Integration tests |

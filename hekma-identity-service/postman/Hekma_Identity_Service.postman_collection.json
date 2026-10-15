@@ -1,0 +1,1535 @@
+{
+  "info": {
+    "name": "Hekma Identity Service API",
+    "description": "Authentication, Multi-tenancy, User management, RBAC Phase 3, Patient onboarding, and GraphQL.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "1. Register Patient (Public)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/auth/register",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ],
+              "query": []
+            },
+            "description": "Creates a user account in Firebase Auth, persists profile in PostgreSQL with PENDING_VERIFICATION, and dispatches OTP.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"patient.test@hekma.com\",\n  \"phoneNumber\": \"+1234567890\",\n  \"password\": \"Password123!\",\n  \"displayName\": \"Test Patient\",\n  \"role\": \"PATIENT\",\n  \"verificationMode\": \"EMAIL\",\n  \"invitationCode\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.attemptId) {",
+                  "    pm.environment.set(\"otp_attempt_id\", jsonData.attemptId);",
+                  "    console.log(\"Captured otp_attempt_id:\", jsonData.attemptId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Register Tenant & Owner (Public)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/auth/register-tenant",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register-tenant"
+              ],
+              "query": []
+            },
+            "description": "Self-registers an organization tenant and root owner in PENDING_VERIFICATION status.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantName\": \"Mayo Clinic Trials\",\n  \"tenantSlug\": \"mayo-clinic-trials\",\n  \"tenantType\": \"SITE\",\n  \"ownerEmail\": \"investigator@mayo.edu\",\n  \"ownerPhoneNumber\": \"+1987654321\",\n  \"ownerPassword\": \"Password123!\",\n  \"ownerDisplayName\": \"Dr. Investigator\",\n  \"verificationMode\": \"EMAIL\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.attemptId) {",
+                  "    pm.environment.set(\"otp_attempt_id\", jsonData.attemptId);",
+                  "    console.log(\"Captured otp_attempt_id:\", jsonData.attemptId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. Login (Direct / 2FA Trigger)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/auth/login",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ],
+              "query": []
+            },
+            "description": "Authenticates credentials against Firebase. For patients with 2FA, triggers OTP. Saves auth_token to environment.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@hekma.com\",\n  \"password\": \"Password123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.idToken) {",
+                  "    pm.environment.set(\"auth_token\", jsonData.idToken);",
+                  "    console.log(\"Captured auth_token:\", jsonData.idToken);",
+                  "}",
+                  "if (jsonData.refreshToken) {",
+                  "    pm.environment.set(\"refresh_token\", jsonData.refreshToken);",
+                  "}",
+                  "if (jsonData.user && jsonData.user.id) {",
+                  "    pm.environment.set(\"user_id\", jsonData.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "4. Refresh ID Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/auth/refresh-token",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "refresh-token"
+              ],
+              "query": []
+            },
+            "description": "Exchanges Firebase refresh token for a fresh ID token.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.idToken) {",
+                  "    pm.environment.set(\"auth_token\", jsonData.idToken);",
+                  "    console.log(\"Captured auth_token:\", jsonData.idToken);",
+                  "}",
+                  "if (jsonData.refreshToken) {",
+                  "    pm.environment.set(\"refresh_token\", jsonData.refreshToken);",
+                  "}",
+                  "if (jsonData.user && jsonData.user.id) {",
+                  "    pm.environment.set(\"user_id\", jsonData.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "5. Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/auth/forgot-password",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "forgot-password"
+              ],
+              "query": []
+            },
+            "description": "Initiates self-service password reset challenge via Email/SMS OTP.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"patient.test@hekma.com\",\n  \"mode\": \"EMAIL\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.attemptId) {",
+                  "    pm.environment.set(\"otp_attempt_id\", jsonData.attemptId);",
+                  "    console.log(\"Captured otp_attempt_id:\", jsonData.attemptId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "6. Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/auth/reset-password",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "reset-password"
+              ],
+              "query": []
+            },
+            "description": "Verifies OTP attempt and sets a new password in Firebase Auth.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"attemptId\": \"{{otp_attempt_id}}\",\n  \"code\": \"123456\",\n  \"newPassword\": \"NewPassword123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7. Change Password (Authenticated)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/auth/change-password",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "change-password"
+              ],
+              "query": []
+            },
+            "description": "Authenticated password rotation. Revokes active sessions and returns refreshed tokens.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Password123!\",\n  \"newPassword\": \"UpdatedPassword123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "OTP Verification",
+      "item": [
+        {
+          "name": "1. Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/auth/otp/send",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "otp",
+                "send"
+              ],
+              "query": []
+            },
+            "description": "Dispatches 6-digit OTP code to email or phone.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"patient.test@hekma.com\",\n  \"mode\": \"EMAIL\",\n  \"purpose\": \"REGISTRATION\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.attemptId) {",
+                  "    pm.environment.set(\"otp_attempt_id\", jsonData.attemptId);",
+                  "    console.log(\"Captured otp_attempt_id:\", jsonData.attemptId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/auth/otp/verify",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "otp",
+                "verify"
+              ],
+              "query": []
+            },
+            "description": "Verifies OTP code and activates account if PENDING_VERIFICATION. Sets auth_token.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"attemptId\": \"{{otp_attempt_id}}\",\n  \"code\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.idToken) {",
+                  "    pm.environment.set(\"auth_token\", jsonData.idToken);",
+                  "    console.log(\"Captured auth_token from OTP verification:\", jsonData.idToken);",
+                  "}",
+                  "if (jsonData.user && jsonData.user.id) {",
+                  "    pm.environment.set(\"user_id\", jsonData.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. Resend OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/auth/otp/resend",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "otp",
+                "resend"
+              ],
+              "query": []
+            },
+            "description": "Generates and resends a new code for the active challenge.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"attemptId\": \"{{otp_attempt_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "Current User (/me)",
+      "item": [
+        {
+          "name": "1. Get Current User Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/me",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "me"
+              ],
+              "query": []
+            },
+            "description": "Returns profile details, tenant context, and role of the authenticated caller."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Get Current User Authorities",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/me/authorities",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "me",
+                "authorities"
+              ],
+              "query": []
+            },
+            "description": "Returns the list of granted granular permissions (RBAC Phase 3)."
+          },
+          "response": []
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "Tenants",
+      "item": [
+        {
+          "name": "1. Get Tenant Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/tenants/{{tenant_id}}",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tenants",
+                "{{tenant_id}}"
+              ],
+              "query": []
+            },
+            "description": "Retrieves tenant metadata (name, slug, type, status, materialized path)."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Update Tenant Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/tenants/{{tenant_id}}",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tenants",
+                "{{tenant_id}}"
+              ],
+              "query": []
+            },
+            "description": "Updates tenant display name and custom JSON metadata.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Acme Clinical Trials Updated\",\n  \"metadata\": {\n    \"region\": \"North America\",\n    \"facilityId\": \"FAC-1001\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3. Update Tenant Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/tenants/{{tenant_id}}/status",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tenants",
+                "{{tenant_id}}",
+                "status"
+              ],
+              "query": []
+            },
+            "description": "Activates or suspends a tenant. Suspending cascades down the tenant subtree.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"reason\": \"Audit cleared successfully\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4. Create Sub-Tenant",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/tenants/{{tenant_id}}/sub-tenants",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tenants",
+                "{{tenant_id}}",
+                "sub-tenants"
+              ],
+              "query": []
+            },
+            "description": "Creates a child organization under the caller's tenant subtree.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantName\": \"Mayo Site NYC\",\n  \"tenantSlug\": \"mayo-site-nyc\",\n  \"tenantType\": \"SITE\",\n  \"ownerEmail\": \"owner.nyc@mayo.edu\",\n  \"ownerPhoneNumber\": \"+12125550199\",\n  \"ownerPassword\": \"Password123!\",\n  \"ownerDisplayName\": \"Dr. NYC Director\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"tenant_id\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "5. List Child Tenants",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/tenants/{{tenant_id}}/children",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tenants",
+                "{{tenant_id}}",
+                "children"
+              ],
+              "query": []
+            },
+            "description": "Lists all direct sub-tenants."
+          },
+          "response": []
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "1. Invite Organization User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/users/invite",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "invite"
+              ],
+              "query": []
+            },
+            "description": "Issues staff invitation with specific authorities within inviter's scope.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"coordinator@mayo.edu\",\n  \"displayName\": \"Trial Coordinator\",\n  \"authorities\": [\n    \"tenant:read\",\n    \"patient:read\",\n    \"patient:create\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2. Accept User Invitation (Public)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/users/accept-invite",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "accept-invite"
+              ],
+              "query": []
+            },
+            "description": "Publicly activates staff profile and registers credentials in Firebase.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"invitationToken\": \"{{invitation_token}}\",\n  \"password\": \"Password123!\",\n  \"displayName\": \"Trial Coordinator\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.idToken) {",
+                  "    pm.environment.set(\"auth_token\", jsonData.idToken);",
+                  "    console.log(\"Captured auth_token:\", jsonData.idToken);",
+                  "}",
+                  "if (jsonData.refreshToken) {",
+                  "    pm.environment.set(\"refresh_token\", jsonData.refreshToken);",
+                  "}",
+                  "if (jsonData.user && jsonData.user.id) {",
+                  "    pm.environment.set(\"user_id\", jsonData.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. List Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/users?page=0&size=20",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Lists users scoped to the caller's tenant subtree."
+          },
+          "response": []
+        },
+        {
+          "name": "4. Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/users/{{user_id}}",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{user_id}}"
+              ],
+              "query": []
+            },
+            "description": "Retrieves user profile and account status."
+          },
+          "response": []
+        },
+        {
+          "name": "5. Update User Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/users/{{user_id}}/status",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{user_id}}",
+                "status"
+              ],
+              "query": []
+            },
+            "description": "Activates or deactivates a user account.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": true,\n  \"reason\": \"Staff member returned from leave\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6. Soft-Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/users/{{user_id}}",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{user_id}}"
+              ],
+              "query": []
+            },
+            "description": "Soft deletes user and revokes all active Firebase sessions."
+          },
+          "response": []
+        },
+        {
+          "name": "7. Get User Authorities",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/users/{{user_id}}/authorities",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{user_id}}",
+                "authorities"
+              ],
+              "query": []
+            },
+            "description": "Returns granted authorities for target user."
+          },
+          "response": []
+        },
+        {
+          "name": "8. Assign User Authorities",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/users/{{user_id}}/authorities",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{user_id}}",
+                "authorities"
+              ],
+              "query": []
+            },
+            "description": "Grants or revokes granular permissions (caller cannot grant beyond own).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"authorities\": [\n    \"tenant:read\",\n    \"patient:read\",\n    \"patient:create\",\n    \"patient:update\",\n    \"patient:assign\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "Patients",
+      "item": [
+        {
+          "name": "1. Invite Patient",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/patients/invite",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patients",
+                "invite"
+              ],
+              "query": []
+            },
+            "description": "Stages a patient profile in caller's tenant and sends email invitation.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"jane.patient@example.com\",\n  \"displayName\": \"Jane Patient\",\n  \"assignedUserId\": \"{{user_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2. Accept Patient Invitation (Public)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/patients/accept-invite",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patients",
+                "accept-invite"
+              ],
+              "query": []
+            },
+            "description": "Activates patient profile, records consent, and provisions credentials.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"invitationToken\": \"{{patient_invitation_token}}\",\n  \"password\": \"Password123!\",\n  \"displayName\": \"Jane Patient\",\n  \"consents\": {\n    \"hipaaConsent\": true,\n    \"gdprConsent\": true,\n    \"termsAccepted\": true\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.idToken) {",
+                  "    pm.environment.set(\"auth_token\", jsonData.idToken);",
+                  "    console.log(\"Captured auth_token:\", jsonData.idToken);",
+                  "}",
+                  "if (jsonData.refreshToken) {",
+                  "    pm.environment.set(\"refresh_token\", jsonData.refreshToken);",
+                  "}",
+                  "if (jsonData.user && jsonData.user.id) {",
+                  "    pm.environment.set(\"user_id\", jsonData.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. List Patients",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/patients?page=0&size=20",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patients"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Lists patients within caller's tenant subtree."
+          },
+          "response": []
+        },
+        {
+          "name": "4. Get Patient by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/patients/{{patient_id}}",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patients",
+                "{{patient_id}}"
+              ],
+              "query": []
+            },
+            "description": "Retrieves patient clinical profile and assigned investigator."
+          },
+          "response": []
+        },
+        {
+          "name": "5. Update Patient Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/patients/{{patient_id}}",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patients",
+                "{{patient_id}}"
+              ],
+              "query": []
+            },
+            "description": "Updates patient demographic attributes.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"displayName\": \"Jane Doe Patient\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6. Reassign Patient Investigator",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/patients/{{patient_id}}/assign",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "patients",
+                "{{patient_id}}",
+                "assign"
+              ],
+              "query": []
+            },
+            "description": "Reassigns patient to another site clinician.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assignedUserId\": \"{{user_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "Platform Admin",
+      "item": [
+        {
+          "name": "1. Invite Platform Admin (SYSTEM_ADMIN only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/api/v1/admin/invite-admin",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "invite-admin"
+              ],
+              "query": []
+            },
+            "description": "Bootstraps an operational platform administrator (Role.ADMIN).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ops.admin@hekma.com\",\n  \"displayName\": \"Ops Administrator\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "GraphQL",
+      "item": [
+        {
+          "name": "1. Query All Users (GraphQL)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/graphql",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "graphql"
+              ],
+              "query": []
+            },
+            "description": "GraphQL query fetching all users with nested tenant details.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query GetAllUsers { users { id email displayName role status createdAt tenant { id name slug } } }\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2. Query User by ID (GraphQL)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{identity_base_url}}/graphql",
+              "host": [
+                "{{identity_base_url}}"
+              ],
+              "path": [
+                "graphql"
+              ],
+              "query": []
+            },
+            "description": "GraphQL query fetching single user by ID.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query GetUser($id: ID!) { userById(id: $id) { id email displayName role status authorities } }\",\n  \"variables\": {\n    \"id\": \"{{user_id}}\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": ""
+    }
+  ]
+}

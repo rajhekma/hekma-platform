@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: hekma-identity-service-test
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    open-in-view: false
+  flyway:
+    enabled: false
+
+firebase:
+  credentials-path: classpath:firebase-service-account.json
+  mock-mode: true
+
+app:
+  system-admin:
+    email: system.admin@hekma.com
+    display-name: "System Administrator"
+    enabled: true
+  notification-service:
+    url: http://localhost:8081
+    service-key: test-notification-service-key
+  security:
+    cors:
+      allowed-origins: http://localhost:3000
+    expose-api-docs: true
+  otp:
+    console-echo: false
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true

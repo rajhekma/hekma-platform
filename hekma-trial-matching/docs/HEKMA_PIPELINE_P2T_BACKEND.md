@@ -1,0 +1,5 @@
+# Moved / split
+
+- **Simple overview (P2T + T2P):** [HEKMA_PIPELINE_API_GUIDE.md](./HEKMA_PIPELINE_API_GUIDE.md)
+- **Detailed P2T (SQL, stages, APIs):** [HEKMA_PIPELINE_P2T_TECHNICAL.md](./HEKMA_PIPELINE_P2T_TECHNICAL.md)
+- **Detailed T2P (SQL, stages, APIs):** [HEKMA_PIPELINE_T2P_TECHNICAL.md](./HEKMA_PIPELINE_T2P_TECHNICAL.md)

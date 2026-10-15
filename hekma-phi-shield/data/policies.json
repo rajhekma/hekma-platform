@@ -1,0 +1,80 @@
+{
+  "default-org": [
+    {
+      "entity_type": "PERSON",
+      "policy_type": "anonymize",
+      "anonymize_strategy": "randomized",
+      "custom_replacement": null,
+      "applies_to_internal": true,
+      "applies_to_external": true
+    },
+    {
+      "entity_type": "US_SSN",
+      "policy_type": "redact",
+      "anonymize_strategy": "randomized",
+      "custom_replacement": null,
+      "applies_to_internal": true,
+      "applies_to_external": true
+    },
+    {
+      "entity_type": "EMAIL_ADDRESS",
+      "policy_type": "redact",
+      "anonymize_strategy": "randomized",
+      "custom_replacement": null,
+      "applies_to_internal": true,
+      "applies_to_external": true
+    }
+  ],
+  "test-org": [
+    {
+      "entity_type": "PERSON",
+      "policy_type": "anonymize",
+      "anonymize_strategy": "randomized",
+      "custom_replacement": null,
+      "applies_to_internal": true,
+      "applies_to_external": true
+    },
+    {
+      "entity_type": "US_SSN",
+      "policy_type": "redact",
+      "anonymize_strategy": "randomized",
+      "custom_replacement": null,
+      "applies_to_internal": true,
+      "applies_to_external": true
+    },
+    {
+      "entity_type": "EMAIL_ADDRESS",
+      "policy_type": "redact",
+      "anonymize_strategy": "randomized",
+      "custom_replacement": null,
+      "applies_to_internal": true,
+      "applies_to_external": true
+    }
+  ],
+  "custom-org-123": [
+    {
+      "entity_type": "PERSON",
+      "policy_type": "anonymize",
+      "anonymize_strategy": "randomized",
+      "custom_replacement": null,
+      "applies_to_internal": true,
+      "applies_to_external": true
+    },
+    {
+      "entity_type": "US_SSN",
+      "policy_type": "redact",
+      "anonymize_strategy": "randomized",
+      "custom_replacement": null,
+      "applies_to_internal": true,
+      "applies_to_external": true
+    },
+    {
+      "entity_type": "EMAIL_ADDRESS",
+      "policy_type": "redact",
+      "anonymize_strategy": "randomized",
+      "custom_replacement": null,
+      "applies_to_internal": true,
+      "applies_to_external": true
+    }
+  ]
+}

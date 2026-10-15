@@ -1,0 +1,15 @@
+[
+  {
+    "Patient_ID": "004fec23-6023-572a-922e-6d73b325e771",
+    "Patient_Summary": "A female patient born on April 13, 2094, has a complex medical history including systemic lupus erythematosus, chronic liver disease, endometriosis, and fibromyalgia. She has undergone multiple procedures such as cholecystectomy, percutaneous hepatic cholangiogram, and other biliary tract interventions. Her condition has been managed with a variety of medications including acetaminophen, gabapentin, hydrocodone, and IV therapies among others. Significant lab findings over the years include leukocytosis, elevated liver enzymes, and episodes of nausea and vomiting linked to her gallbladder issues. She has been treated in various settings including emergency, ambulatory, and observation encounters, reflecting acute exacerbations and management of her chronic conditions.",
+    "Patient_Block_Summary": {
+      "demographics": "Female patient",
+      "allergies": null,
+      "conditions": "Systemic lupus erythematosus, chronic liver disease, endometriosis, fibromyalgia, gallbladder issues",
+      "procedures": "Cholecystectomy, percutaneous hepatic cholangiogram, biliary tract interventions",
+      "medications": "Acetaminophen, gabapentin, hydrocodone, IV therapies",
+      "observations": "Leukocytosis, elevated liver enzymes, nausea and vomiting",
+      "immunizations": null
+    }
+  }
+]

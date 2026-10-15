@@ -1,0 +1,279 @@
+{
+  "info": {
+    "_postman_id": "trialgpt-lite-api-v1",
+    "name": "TrialGPT Lite API",
+    "description": "Postman collection for **TrialGPT Lite** (`trialgpt_lite.app`).\n\nDefault local server: `http://127.0.0.1:8050`\nSwagger: `http://127.0.0.1:8050/docs`\n\n**Auth:** none. Lite is a public matching + registry-monitor API.\n\n**Typical flow**\n1. `GET /api/health`\n2. `POST /api/match` (saves `nctId` and `nextPageToken`)\n3. `GET /api/trials/{{nctId}}`\n4. `GET /api/trials/{{nctId}}/patient-summary`\n5. `GET /api/trials/{{nctId}}/questionnaire`\n6. `POST /api/trials/{{nctId}}/evaluate-eligibility`\n\nStart Lite: `python -m trialgpt_lite.app`",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://127.0.0.1:8050", "type": "string" },
+    { "key": "nctId", "value": "NCT03443024", "type": "string" },
+    { "key": "condition", "value": "non-small cell lung cancer", "type": "string" },
+    { "key": "cityOrZip", "value": "Boston, MA", "type": "string" },
+    { "key": "searchRadiusMiles", "value": "30", "type": "string" },
+    { "key": "nextPageToken", "value": "", "type": "string" }
+  ],
+  "auth": { "type": "noauth" },
+  "item": [
+    {
+      "name": "01 — Health",
+      "item": [
+        {
+          "name": "GET /api/health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health",
+            "description": "Service health. Returns engine name, ClinicalTrials.gov source, and PostgreSQL cache stats."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/cache/stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/cache/stats",
+            "description": "PostgreSQL Cache-Aside diagnostics (cached queries, studies, matches, hit counts)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 — Trial Matching & Search",
+      "item": [
+        {
+          "name": "POST /api/match — condition + location",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const j = pm.response.json();",
+                  "  if (j.next_page_token) pm.collectionVariables.set('nextPageToken', j.next_page_token);",
+                  "  if (j.trials && j.trials.length && j.trials[0].nct_id) {",
+                  "    pm.collectionVariables.set('nctId', j.trials[0].nct_id);",
+                  "  }",
+                  "  pm.test('match returned trials array', function () {",
+                  "    pm.expect(j).to.have.property('trials');",
+                  "    pm.expect(j.trials).to.be.an('array');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"condition\": \"{{condition}}\",\n  \"city_or_zip\": \"{{cityOrZip}}\",\n  \"search_radius_miles\": {{searchRadiusMiles}},\n  \"demographics\": {\n    \"age\": 58,\n    \"sex\": \"FEMALE\"\n  },\n  \"page_size\": 10,\n  \"page_token\": null,\n  \"recruiting_only\": true,\n  \"force_refresh\": false\n}"
+            },
+            "url": "{{baseUrl}}/api/match",
+            "description": "Streamlined search (condition + 30-mile location + age/sex). Saves first `nctId` and `nextPageToken`.\n\nOmit `patient.clinical_note` / set `max_criteria_evals: 0` for fast search without criteria evaluation."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/match — next page",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"condition\": \"{{condition}}\",\n  \"city_or_zip\": \"{{cityOrZip}}\",\n  \"search_radius_miles\": {{searchRadiusMiles}},\n  \"demographics\": {\n    \"age\": 58,\n    \"sex\": \"FEMALE\"\n  },\n  \"page_size\": 10,\n  \"page_token\": \"{{nextPageToken}}\",\n  \"recruiting_only\": true,\n  \"force_refresh\": false\n}"
+            },
+            "url": "{{baseUrl}}/api/match",
+            "description": "Uses `nextPageToken` from the previous match. Run the first match request first. Empty token = last page."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/match — with clinical note",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"condition\": \"{{condition}}\",\n  \"city_or_zip\": \"{{cityOrZip}}\",\n  \"search_radius_miles\": {{searchRadiusMiles}},\n  \"patient\": {\n    \"age\": 58,\n    \"sex\": \"FEMALE\",\n    \"clinical_note\": \"Patient is a 58yo female diagnosed with stage IV NSCLC. Biopsy confirmed EGFR exon 19 deletion. ECOG status 1. Prior carboplatin/pemetrexed.\"\n  },\n  \"page_size\": 10,\n  \"page_token\": null,\n  \"recruiting_only\": true,\n  \"force_refresh\": false\n}"
+            },
+            "url": "{{baseUrl}}/api/match",
+            "description": "Full patient matching: demographics + EHR/clinical note. Offline rule-based criteria evaluation."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/match — explicit geo_filter",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"condition\": \"{{condition}}\",\n  \"geo_filter\": {\n    \"latitude\": 42.3601,\n    \"longitude\": -71.0589,\n    \"radius_miles\": 30\n  },\n  \"demographics\": {\n    \"age\": 58,\n    \"sex\": \"FEMALE\"\n  },\n  \"page_size\": 10,\n  \"recruiting_only\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/match",
+            "description": "Same search using explicit GPS coordinates instead of city/zip geocoding."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/trials/{nct_id}",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/trials/{{nctId}}?force_refresh=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trials", "{{nctId}}"],
+              "query": [
+                { "key": "force_refresh", "value": "false", "description": "Set true to bypass PostgreSQL cache" }
+              ]
+            },
+            "description": "Full 14-section protocol for one NCT ID."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/trials/{nct_id}/patient-summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/trials/{{nctId}}/patient-summary?force_refresh=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trials", "{{nctId}}", "patient-summary"],
+              "query": [
+                { "key": "force_refresh", "value": "false", "description": "Set true to regenerate via Groq LPU" }
+              ]
+            },
+            "description": "Plain-English patient study summary + medical glossary."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/trials/{nct_id}/questionnaire",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/trials/{{nctId}}/questionnaire?mode=realtime&force_refresh=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trials", "{{nctId}}", "questionnaire"],
+              "query": [
+                { "key": "mode", "value": "realtime", "description": "realtime (Groq) or offline (heuristic)" },
+                { "key": "force_refresh", "value": "false" }
+              ]
+            },
+            "description": "5–7 Yes/No eligibility questions (See if I'm Eligible)."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/trials/{nct_id}/evaluate-eligibility",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nct_id\": \"{{nctId}}\",\n  \"answers\": [\n    { \"question_id\": \"inc_0\", \"answer\": \"YES\" },\n    { \"question_id\": \"inc_1\", \"answer\": \"YES\" },\n    { \"question_id\": \"exc_0\", \"answer\": \"NO\" },\n    { \"question_id\": \"exc_1\", \"answer\": \"NOT_SURE\" }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/trials/{{nctId}}/evaluate-eligibility",
+            "description": "Offline verdict from questionnaire answers. Allowed answers: `YES`, `NO`, `NOT_SURE`.\n\nReplace `question_id` values with IDs from the questionnaire response."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 — Registry Monitoring",
+      "item": [
+        {
+          "name": "GET /api/registry/metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/registry/metrics?force_refresh=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "registry", "metrics"],
+              "query": [
+                { "key": "force_refresh", "value": "false" }
+              ]
+            },
+            "description": "Live recruiting volume plus newly added / updated counts (24h and 7d)."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/registry/feed — new",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/registry/feed?type=new&days=7&limit=25",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "registry", "feed"],
+              "query": [
+                { "key": "type", "value": "new" },
+                { "key": "days", "value": "7" },
+                { "key": "limit", "value": "25" }
+              ]
+            },
+            "description": "Newly posted recruiting studies. `type` must be `new` or `updated`."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/registry/feed — updated",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/registry/feed?type=updated&days=7&limit=25",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "registry", "feed"],
+              "query": [
+                { "key": "type", "value": "updated" },
+                { "key": "days", "value": "7" },
+                { "key": "limit", "value": "25" }
+              ]
+            },
+            "description": "Recruiting studies with recent protocol/status amendments."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/registry/history",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/registry/history?limit_days=30",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "registry", "history"],
+              "query": [
+                { "key": "limit_days", "value": "30" }
+              ]
+            },
+            "description": "Daily snapshot trend for charts and audit logging."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

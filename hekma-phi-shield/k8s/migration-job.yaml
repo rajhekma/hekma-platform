@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: privacy-detection-db-migration
+  namespace: privacy-detection
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: db-migrator
+          image: privacy-detection-service:latest
+          command: ["python3", "api/database/init_db.py"]
+          envFrom:
+            - configMapRef:
+                name: privacy-detection-config
+            - secretRef:
+                name: privacy-detection-secrets
+  backoffLimit: 3

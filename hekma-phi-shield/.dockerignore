@@ -1,0 +1,31 @@
+# Shared by Dockerfile, admin_dashboard/backend/Dockerfile and deployment/Dockerfile
+# (all use the repo root as build context). Keep models/ and requirements.txt visible.
+
+# Frontend: built inside the image; never ship a laptop build or node_modules.
+**/node_modules
+admin_dashboard/frontend/dist
+
+# Python
+**/__pycache__
+**/*.py[cod]
+.venv
+venv
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.coverage
+htmlcov
+
+# Local secrets and tooling
+.env
+.env.*
+!.env.example
+.tools
+.git
+.github
+.vscode
+.idea
+**/.DS_Store
+
+# Training checkpoints (final weights live in models/)
+training/artifacts

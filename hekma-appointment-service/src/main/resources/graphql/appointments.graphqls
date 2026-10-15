@@ -1,0 +1,139 @@
+type Query {
+    searchAppointment(
+        fromKey: String
+        fromType: String
+        toKey: String
+        toType: String
+        startDateTime: String
+        endDateTime: String
+        status: String
+    ): [AppointmentDTO]
+
+    getReminders(
+        id: String!
+        type: String!
+    ): [ReminderDTO]
+
+    getNotificationPreference(
+        userId: String!
+        userType: String!
+    ): NotificationPreferenceDTO
+}
+
+type Mutation {
+    createAppointment(
+        fromKey: String!
+        fromType: String!
+        fromName: String
+        fromMail: String
+        toKey: String!
+        toType: String!
+        toName: String
+        toMail: String
+        startDateTime: String!
+        endDateTime: String!
+        note: String
+        mailSubject: String
+        mailText: String
+        docMailText: String
+        navLink: String
+        docNavLink: String
+        reference: String
+    ): ApiResponse
+
+    updateAppointment(
+        appointmentId: String!
+        note: String
+        status: String!
+    ): ApiResponse
+
+    updateAppointmentDetails(
+        appointmentId: String!
+        fromKey: String!
+        fromType: String!
+        fromName: String
+        fromMail: String
+        toKey: String!
+        toType: String!
+        toName: String
+        toMail: String
+        startDateTime: String!
+        endDateTime: String!
+        note: String
+        mailSubject: String
+        mailText: String
+        docMailText: String
+        navLink: String
+        docNavLink: String
+        reference: String
+    ): ApiResponse
+
+    deleteAppointment(
+        appointmentId: String!
+    ): ApiResponse
+
+    updateNotificationStatus(
+        appointmentId: String!
+        note: String
+        status: String!
+    ): ApiResponse
+}
+
+type AppointmentDTO {
+    id: ID
+    appointmentId: String
+    fromKey: String
+    fromType: String
+    fromName: String
+    fromMail: String
+    fromEmail: String
+    toKey: String
+    toType: String
+    toName: String
+    toMail: String
+    toEmail: String
+    startDateTime: String
+    endDateTime: String
+    note: String
+    mailSubject: String
+    mailText: String
+    docMailText: String
+    navLink: String
+    docNavLink: String
+    reference: String
+    status: String
+    notificationStatus: String
+    reminder7dSent: Boolean
+    reminder1dSent: Boolean
+    reminder1hSent: Boolean
+    createdAt: String
+    updatedAt: String
+}
+
+type ReminderDTO {
+    id: ID
+    userId: String
+    userType: String
+    referenceId: String
+    referenceType: String
+    startDateTime: String
+    notificationType: String
+    message: String
+    viewedStatus: String
+    createdTs: String
+}
+
+type NotificationPreferenceDTO {
+    userId: String
+    userType: String
+    toggleInApp: Boolean
+    toggleEmail: Boolean
+    toggleMessage: Boolean
+}
+
+type ApiResponse {
+    status: Int
+    type: String
+    message: String
+    attributes: String
+}

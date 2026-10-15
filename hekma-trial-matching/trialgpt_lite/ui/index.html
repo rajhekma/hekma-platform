@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrialGPT Lite | Clinical Decision Support & Registry Monitor</title>
+  <link rel="stylesheet" href="/ui/style.css?v=5.6">
+</head>
+<body>
+  <!-- Header -->
+  <header class="top-header">
+    <div class="brand-wrapper">
+      <div class="brand-icon-box">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+          <line x1="12" y1="22.08" x2="12" y2="12"></line>
+        </svg>
+      </div>
+      <div class="brand-title">
+        TrialGPT <span class="brand-badge">Lite</span>
+      </div>
+    </div>
+
+    <!-- Center Nav View Switcher -->
+    <div class="nav-tab-switcher">
+      <button type="button" class="btn-nav-switch active" id="tab-nav-matcher" onclick="switchView('matcher')">
+        🧬 Trial Matcher
+      </button>
+      <button type="button" class="btn-nav-switch" id="tab-nav-monitor" onclick="switchView('monitor')">
+        📊 Registry Monitor (RECRUITING)
+      </button>
+    </div>
+
+    <div class="header-actions">
+      <div class="registry-badge" title="Direct HTTPS connection to clinicaltrials.gov/api/v2">
+        <span class="status-dot-active"></span>
+        <span>CT.gov API v2</span>
+      </div>
+      <div class="registry-badge engine-pill-badge" title="100% Offline Rule-Based Engine (Runs locally in Python with zero API keys)">
+        <span class="engine-pulse-dot"></span>
+        <span>100% Offline</span>
+      </div>
+      <a href="/docs" target="_blank" rel="noopener noreferrer" class="registry-badge" style="text-decoration: none; color: var(--primary); font-weight: 600;" title="Open Interactive Swagger UI API Documentation">
+        <span>📖 Swagger UI</span>
+      </a>
+      <a href="/ui/QUESTIONNAIRE_EVALUATION_ARCHITECTURE.pdf" target="_blank" download="QUESTIONNAIRE_EVALUATION_ARCHITECTURE.pdf" class="registry-badge" style="text-decoration: none; color: #059669; font-weight: 600;" title="Download Architecture & Evaluation Specification PDF">
+        <span>📄 Architecture PDF</span>
+      </a>
+      <button type="button" class="btn-theme" id="theme-btn" onclick="toggleTheme()">
+        <span id="theme-icon">🌙</span>
+        <span id="theme-label">Dark</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= VIEW 1: TRIAL MATCHER ================= -->
+  <main class="app-layout" id="view-matcher">
+    <!-- Left Console -->
+    <aside class="panel-console">
+      <div class="panel-head">
+        <div>
+          <h2>Match Console</h2>
+          <p>Query trials & evaluate protocol eligibility</p>
+        </div>
+        <button type="button" class="btn-clear" onclick="resetForm()">Clear</button>
+      </div>
+
+      <!-- Sample Cases -->
+      <div class="sample-bar">
+        <span class="sample-bar-label">Clinical Presets</span>
+        <div class="sample-grid">
+          <button type="button" class="sample-btn" onclick="loadPreset('nsclc')">
+            <span class="sample-name">NSCLC (EGFR+)</span>
+            <span class="sample-sub">Stage IV Lung Cancer</span>
+          </button>
+          <button type="button" class="sample-btn" onclick="loadPreset('tnbc')">
+            <span class="sample-name">TNBC (Stage III)</span>
+            <span class="sample-sub">Triple-Neg Breast</span>
+          </button>
+          <button type="button" class="sample-btn" onclick="loadPreset('melanoma')">
+            <span class="sample-name">Melanoma (BRAF+)</span>
+            <span class="sample-sub">Cutaneous Metastatic</span>
+          </button>
+          <button type="button" class="sample-btn" onclick="loadPreset('diabetes')">
+            <span class="sample-name">Type 2 Diabetes</span>
+            <span class="sample-sub">HbA1c 8.8% Refractory</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <form id="match-form" onsubmit="handleMatch(event)" class="form-stack">
+        <!-- Target Toggle: Myself vs Friend -->
+        <div class="target-toggle-bar">
+          <button type="button" id="tab-btn-myself" class="target-tab active" onclick="switchSearchTarget('myself')">
+            <span class="target-icon">👤</span>
+            <span>For Myself</span>
+          </button>
+          <button type="button" id="tab-btn-friend" class="target-tab" onclick="switchSearchTarget('friend')">
+            <span class="target-icon">👥</span>
+            <span>For a Friend</span>
+          </button>
+        </div>
+
+        <!-- Target Condition -->
+        <div class="field-group">
+          <label class="field-label" for="condition-input">
+            Target Medical Condition
+            <span class="tag-req">Required</span>
+          </label>
+          <input
+            type="text"
+            id="condition-input"
+            class="text-input"
+            placeholder="e.g. non-small cell lung cancer, melanoma"
+            required
+          />
+        </div>
+
+        <!-- Location & 30-Mile Radius -->
+        <div class="grid-2col">
+          <div class="field-group">
+            <label class="field-label" for="location-input">
+              City or Zip Code
+              <span class="tag-opt">Geo Proximity</span>
+            </label>
+            <input
+              type="text"
+              id="location-input"
+              class="text-input"
+              placeholder="e.g. 02115 or Boston, MA"
+              value="Boston, MA"
+            />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="radius-select">
+              Search Radius
+              <span class="tag-opt" id="geo-tag">Distance</span>
+            </label>
+            <select id="radius-select" class="select-input">
+              <option value="15">Within 15 miles</option>
+              <option value="30" selected>Within 30 miles</option>
+              <option value="50">Within 50 miles</option>
+              <option value="100">Within 100 miles</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Flow 1: Myself Profile Banner -->
+        <div id="profile-prefill-box" class="profile-prefill-box">
+          <div class="profile-check-badge">✓ Profile Loaded</div>
+          <div class="profile-details">
+            Age: <strong>52</strong> • Sex: <strong>Female</strong>
+          </div>
+          <div class="profile-subtext">Demographics pre-loaded from profile. Criteria checked via interactive screener.</div>
+        </div>
+
+        <!-- Flow 2: Friend Demographics Inputs (Hidden when searching for myself) -->
+        <div id="friend-demographics-grid" class="grid-2col" style="display: none;">
+          <div class="field-group">
+            <label class="field-label" for="age-input">
+              Friend's Age
+              <span class="tag-req">Years</span>
+            </label>
+            <input
+              type="number"
+              id="age-input"
+              class="text-input"
+              placeholder="e.g. 62"
+              min="0"
+              max="120"
+            />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="sex-select">
+              Friend's Biological Sex
+              <span class="tag-req">Filter</span>
+            </label>
+            <select id="sex-select" class="select-input">
+              <option value="ALL">Any / Both</option>
+              <option value="FEMALE">Female</option>
+              <option value="MALE">Male</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Compact Options -->
+        <div class="form-compact-row">
+          <div class="compact-field">
+            <label for="max-trials-input">Trials per Page</label>
+            <input type="number" id="max-trials-input" class="compact-number-input" value="10" min="5" max="50" />
+          </div>
+          <label class="compact-checkbox" title="Filter for actively recruiting studies only">
+            <input type="checkbox" id="recruiting-only-checkbox" checked />
+            <span>Recruiting Only</span>
+          </label>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="submit-btn" class="btn-submit-main">
+          <span id="btn-text">Match Clinical Trials</span>
+        </button>
+      </form>
+
+    </aside>
+
+    <!-- Right Results Panel -->
+    <section class="panel-results">
+      <!-- Loading State -->
+      <div class="loader-box" id="loading-box" style="display: none;">
+        <div class="spinner-clean"></div>
+        <div>
+          <h4 id="loading-title" style="font-weight: 700; color: var(--text-main);">Searching ClinicalTrials.gov API v2...</h4>
+          <p id="loading-subtitle" style="font-size: 0.825rem; color: var(--text-subtle); margin-top: 0.2rem;">Retrieving protocols</p>
+        </div>
+      </div>
+
+      <!-- Metrics Row -->
+      <div class="metrics-row" id="metrics-grid" style="display: none;">
+        <div class="metric-card">
+          <span class="caption">CT.gov Registry</span>
+          <span class="value" id="metric-total">0</span>
+        </div>
+        <div class="metric-card">
+          <span class="caption">Candidates Fetched</span>
+          <span class="value" id="metric-fetched">0</span>
+        </div>
+        <div class="metric-card">
+          <span class="caption">AI Evaluated</span>
+          <span class="value" id="metric-evaluated">0</span>
+        </div>
+        <div class="metric-card">
+          <span class="caption">Execution Latency</span>
+          <span class="value" id="metric-latency">0s</span>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar-results" id="results-toolbar" style="display: none;">
+        <div class="filter-group">
+          <!-- Dynamically populated -->
+        </div>
+
+        <input
+          type="text"
+          id="search-within-input"
+          class="search-field"
+          placeholder="Filter results by drug, NCT..."
+          oninput="handleSearchWithin(this.value)"
+        />
+      </div>
+
+      <!-- Cards Feed -->
+      <div class="cards-feed" id="trials-feed">
+        <!-- Professional Welcome Hero -->
+        <div class="welcome-hero" id="welcome-hero">
+          <div class="hero-header">
+            <h3>Clinical Trial Intelligence</h3>
+            <p>Direct real-time retrieval from the official ClinicalTrials.gov REST API v2 with automated eligibility evaluation.</p>
+          </div>
+
+          <div class="feature-cards-grid">
+            <div class="feature-card">
+              <div class="feat-icon">1</div>
+              <h4>Direct Registry Integration</h4>
+              <p>Queries official ClinicalTrials.gov REST API v2 endpoints with automatic query relaxation and retry resilience.</p>
+            </div>
+            <div class="feature-card">
+              <div class="feat-icon">2</div>
+              <h4>Two-Tier Pre-Screening</h4>
+              <p>Instantly screens demographic boundaries (age, biological sex) before running deeper criteria analysis.</p>
+            </div>
+            <div class="feature-card">
+              <div class="feat-icon">3</div>
+              <h4>Evidence Attribution</h4>
+              <p>Cites exact patient sentences and delivers explainable verdicts: Eligible, Likely Eligible, or Ineligible.</p>
+            </div>
+        </div>
+      </div>
+
+      <!-- Pagination Toolbar (Top 10 Results & Next Page) -->
+      <div class="pagination-container" id="pagination-container" style="display: none;">
+        <div class="pagination-info" id="pagination-info">
+          Showing 1–10 of studies
+        </div>
+        <div class="pagination-actions">
+          <button type="button" class="btn-page" id="btn-prev-page" onclick="loadPreviousPage()" disabled>
+            ⬅ Previous
+          </button>
+          <span class="page-badge" id="current-page-badge">Page 1</span>
+          <button type="button" class="btn-page primary" id="btn-next-page" onclick="loadNextPage()">
+            <span>Next 10 Studies ➔</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================= VIEW 2: REGISTRY MONITOR ================= -->
+  <main class="monitor-layout" id="view-monitor" style="display: none;">
+    <!-- Top 4 Hero Stats Grid -->
+    <div class="monitor-stats-grid">
+      <div class="stat-hero-card primary">
+        <div class="stat-topline">
+          <span class="stat-title">Total Active Recruiting</span>
+          <span class="stat-badge">Global Registry</span>
+        </div>
+        <div class="stat-main-number" id="mon-total-recruiting">—</div>
+        <div class="stat-detail-subtext">Clinical studies actively enrolling patients</div>
+      </div>
+
+      <div class="stat-hero-card success">
+        <div class="stat-topline">
+          <span class="stat-title">Newly Registered</span>
+          <span class="stat-badge" id="mon-new-badge">Past 24h</span>
+        </div>
+        <div class="stat-main-number" id="mon-new-24h">—</div>
+        <div class="stat-detail-subtext" id="mon-new-7d-sub">Loading 7-day rate...</div>
+      </div>
+
+      <div class="stat-hero-card warning">
+        <div class="stat-topline">
+          <span class="stat-title">Protocol Updates</span>
+          <span class="stat-badge" id="mon-upd-badge">Past 24h</span>
+        </div>
+        <div class="stat-main-number" id="mon-upd-24h">—</div>
+        <div class="stat-detail-subtext" id="mon-upd-7d-sub">Loading 7-day updates...</div>
+      </div>
+
+      <div class="stat-hero-card neutral">
+        <div class="stat-topline">
+          <span class="stat-title">Registry Sync Status</span>
+          <span class="stat-badge" id="mon-sync-status">Live</span>
+        </div>
+        <div class="stat-main-number" style="font-size: 1.35rem;" id="mon-last-sync-time">Just now</div>
+        <div class="stat-detail-subtext">Persistent SQLite snapshots active</div>
+      </div>
+    </div>
+
+    <!-- Schedule Notice Banner -->
+    <div class="schedule-banner">
+      <div>
+        <strong>NLM/NIH Publication Schedule:</strong> ClinicalTrials.gov updates batches on US business days (Mon–Fri at ~9:00 PM EST). Weekend numbers reflect Friday's latest release.
+      </div>
+      <button type="button" class="btn-refresh-monitor" onclick="loadRegistryMetrics(true)">
+        🔄 Force Refresh
+      </button>
+    </div>
+
+    <!-- Monitor Controls Toolbar -->
+    <div class="monitor-toolbar">
+      <div class="monitor-subtabs">
+        <button type="button" class="monitor-subtab active" id="subtab-new" onclick="setMonitorFeedType('new', this)">
+          🆕 Newly Added Studies (<span id="mon-count-new-tab">0</span>)
+        </button>
+        <button type="button" class="monitor-subtab" id="subtab-updated" onclick="setMonitorFeedType('updated', this)">
+          🔄 Recently Updated (<span id="mon-count-upd-tab">0</span>)
+        </button>
+        <button type="button" class="monitor-subtab" id="subtab-history" onclick="setMonitorFeedType('history', this)">
+          📈 Daily Trend History
+        </button>
+      </div>
+
+      <div class="monitor-controls-right">
+        <span style="font-size: 0.8rem; color: var(--text-subtle);">Window:</span>
+        <select id="mon-days-select" class="select-input" style="padding: 4px 8px; font-size: 0.8rem;" onchange="loadRegistryFeed()">
+          <option value="1">Past 24 Hours</option>
+          <option value="7" selected>Past 7 Days</option>
+          <option value="30">Past 30 Days</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Data Table Container -->
+    <div class="monitor-table-wrap">
+      <div id="mon-table-loading" style="padding: 3rem; text-align: center; display: none;">
+        <div class="spinner-clean" style="margin: 0 auto 0.5rem auto;"></div>
+        <p style="font-size: 0.825rem; color: var(--text-subtle);">Loading live registry records from ClinicalTrials.gov...</p>
+      </div>
+
+      <table class="monitor-table" id="mon-data-table">
+        <thead id="mon-table-head">
+          <tr>
+            <th>NCT ID</th>
+            <th>Study Title</th>
+            <th>Status</th>
+            <th>First Posted</th>
+            <th>Conditions</th>
+            <th>Lead Sponsor</th>
+          </tr>
+        </thead>
+        <tbody id="mon-table-body">
+          <!-- Populated dynamically -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- ================= ELIGIBILITY QUESTIONNAIRE MODAL ================= -->
+  <div id="eligibility-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div>
+          <span id="quest-modal-badge" class="modal-badge">⚡ Real-Time AI Screener (Groq LPU)</span>
+          <h3 id="quest-trial-title" class="modal-title">Check Your Eligibility</h3>
+          <p id="quest-nct-id" class="modal-sub"></p>
+        </div>
+        <button type="button" class="btn-close-modal" onclick="closeEligibilityModal()" title="Close Screener">✕</button>
+      </div>
+
+      <div id="quest-body" class="modal-body">
+        <!-- Loading State -->
+        <div id="quest-loading" class="quest-loading-state" style="display: flex;">
+          <div class="spinner-clean"></div>
+          <p style="margin-top: 0.75rem; font-weight: 600; color: var(--text-main);">Analyzing protocol criteria & generating questions...</p>
+          <span style="font-size: 0.78rem; color: var(--text-subtle); margin-top: 0.25rem;">Execution time &lt; 1ms locally in Python</span>
+        </div>
+
+        <!-- Questions Wizard Container -->
+        <div id="quest-questions-container" style="display: none;">
+          <!-- Pre-Answered Demographics Banner -->
+          <div id="quest-pre-answered" class="quest-banner-info"></div>
+
+          <!-- Wizard Stepper & Progress Tracker -->
+          <div class="wizard-header-tracker">
+            <div class="wizard-meta-row">
+              <span id="wizard-step-counter" class="wizard-step-counter">Question 1 of 5</span>
+              <span id="wizard-progress-pct" class="wizard-progress-pct">20% Completed</span>
+            </div>
+            <div class="wizard-progress-track">
+              <div id="wizard-progress-fill" class="wizard-progress-fill" style="width: 20%;"></div>
+            </div>
+            <!-- Step pills / dots row -->
+            <div id="wizard-step-pills" class="wizard-step-pills"></div>
+          </div>
+
+          <!-- Active Question Slide / Card -->
+          <div id="wizard-step-view" class="wizard-step-view"></div>
+
+          <!-- Wizard Navigation Footer -->
+          <div class="wizard-footer">
+            <button type="button" id="btn-wizard-prev" class="btn-wizard-nav btn-wizard-prev" onclick="goToPrevWizardStep()">
+              ← Previous
+            </button>
+            <div class="wizard-footer-hint">
+              <span>Shortcuts: <strong>1</strong> (Yes), <strong>2</strong> (No), <strong>3</strong> (Unsure)</span>
+            </div>
+            <div class="wizard-footer-actions">
+              <button type="button" id="btn-wizard-next" class="btn-wizard-nav btn-wizard-next" onclick="goToNextWizardStep()">
+                <span>Next Question →</span>
+              </button>
+              <button type="button" id="btn-wizard-submit" class="btn-modal-submit" style="display: none;" onclick="submitEligibilityAnswers()">
+                <span>Submit Answers &amp; See Verdict ➔</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Verdict Screen -->
+        <div id="quest-verdict-container" style="display: none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= PATIENT STUDY SUMMARY MODAL ================= -->
+  <div id="patient-summary-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-dialog modal-dialog-wide">
+      <div class="modal-header">
+        <div>
+          <span id="summary-modal-badge" class="modal-badge">⚡ Plain-English Study Summary (Groq LPU)</span>
+          <h3 id="summary-plain-title" class="modal-title">Study Summary</h3>
+          <p id="summary-nct-meta" class="modal-sub"></p>
+        </div>
+        <button type="button" class="btn-close-modal" onclick="closePatientSummaryModal()" title="Close Summary">✕</button>
+      </div>
+
+      <div id="summary-modal-body" class="modal-body">
+        <!-- Loading State -->
+        <div id="summary-loading" class="quest-loading-state" style="display: flex;">
+          <div class="spinner-clean"></div>
+          <p style="margin-top: 0.75rem; font-weight: 600; color: var(--text-main);">Translating clinical protocol into plain English with Groq LPU...</p>
+          <span style="font-size: 0.78rem; color: var(--text-subtle); margin-top: 0.25rem;">Ultra-fast real-time translation &amp; medical term glossary (~250ms)</span>
+        </div>
+
+        <!-- Summary Content Container -->
+        <div id="summary-content" style="display: none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/ui/app.js?v=5.6"></script>
+</body>
+</html>
+
